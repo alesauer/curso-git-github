@@ -1911,6 +1911,496 @@ h1 span {
   }
 }
 
+/* ============================================================
+   Student Registration & Profile Styles
+   ============================================================ */
+.student-profile-btn, .student-register-btn, .top-cert-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 10px;
+  padding: 7px 12px;
+  font: 600 13px var(--font-body);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.student-register-btn {
+  background: var(--green-pale);
+  border: 1px solid #cce5c2;
+  color: var(--green-dark);
+}
+
+.student-register-btn:hover {
+  background: #dbf0ce;
+  border-color: #b3dba4;
+  transform: translateY(-1px);
+}
+
+.student-profile-btn {
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.student-profile-btn:hover {
+  border-color: #c9e3bc;
+  background: #fcfefb;
+  color: var(--green-dark);
+}
+
+.student-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--green-pale);
+  color: var(--green-dark);
+  display: grid;
+  place-items: center;
+}
+
+.student-edit-icon {
+  color: var(--muted);
+  margin-left: 2px;
+}
+
+.top-cert-btn {
+  background: linear-gradient(135deg, #1b5b0b 0%, #2e8b15 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(45, 93, 27, 0.25);
+  animation: pulseHighlight 2s infinite ease-in-out;
+}
+
+.top-cert-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(45, 93, 27, 0.35);
+}
+
+@keyframes pulseHighlight {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+/* Sidebar Certificate Banner */
+.sidebar-cert-banner {
+  margin: 12px 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f2faee 0%, #e5f6de 100%);
+  border: 1px solid #c2e5b6;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.sidebar-cert-banner:hover {
+  background: #daf1d1;
+  border-color: #aedfa0;
+  transform: translateY(-1px);
+}
+
+.cert-banner-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--green);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+}
+
+.sidebar-cert-banner strong {
+  display: block;
+  font: 700 13px var(--font-heading);
+  color: var(--green-dark);
+}
+
+.sidebar-cert-banner span {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+/* Modal Overlay & Base */
+.app-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(14, 28, 14, 0.72);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.18s ease-out;
+  overflow-y: auto;
+}
+
+.app-modal-box {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--line);
+  position: relative;
+  overflow: hidden;
+  max-width: 480px;
+  width: 100%;
+}
+
+.app-modal-header {
+  padding: 24px 26px 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.app-modal-header h3 {
+  font: 800 20px/1.3 var(--font-heading);
+  color: var(--ink);
+  margin: 4px 0 4px;
+}
+
+.app-modal-header p {
+  font-size: 13.5px;
+  color: var(--ink-light);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.app-modal-close-btn {
+  background: #f1f5ee;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  flex: 0 0 32px;
+}
+
+.app-modal-close-btn:hover {
+  background: #e4ece0;
+  color: var(--ink);
+}
+
+.app-modal-body {
+  padding: 0 26px 26px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font: 700 13px var(--font-heading);
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  font: 500 14px var(--font-body);
+  color: var(--ink);
+  background: #fdfdfd;
+  transition: all 0.18s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(62, 163, 22, 0.15);
+  background: #fff;
+}
+
+.form-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+/* ============================================================
+   Certificate Modal & Frame Styles
+   ============================================================ */
+.cert-modal-box {
+  max-width: 960px;
+  width: 100%;
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.cert-modal-topbar {
+  padding: 16px 24px;
+  background: #f8fbf5;
+  border-bottom: 1px solid #e1ecdb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cert-modal-topbar strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 800 16px var(--font-heading);
+  color: var(--green-dark);
+}
+
+.cert-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cert-scroll-area {
+  overflow-y: auto;
+  padding: 24px;
+  background: #eaefe6;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+/* Certificate Frame (Landscape) */
+.certificate-frame {
+  width: 100%;
+  max-width: 880px;
+  background: #fff;
+  border: 2px solid #b79a4a;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 16px 45px rgba(20, 45, 15, 0.18);
+  position: relative;
+  box-sizing: border-box;
+}
+
+.certificate-inner {
+  border: 1px solid #d4c285;
+  border-radius: 8px;
+  padding: 36px 42px;
+  background: radial-gradient(circle at center, #ffffff 60%, #fafcf7 100%);
+  position: relative;
+  text-align: center;
+}
+
+.cert-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.cert-kicker {
+  font: 800 11.5px/1 var(--font-heading);
+  letter-spacing: 2px;
+  color: #92752c;
+  text-transform: uppercase;
+}
+
+.certificate-inner h1 {
+  font: 800 clamp(24px, 3.4vw, 34px)/1.2 var(--font-heading);
+  letter-spacing: 1px;
+  color: #1a4214;
+  margin: 0 0 16px;
+  text-transform: uppercase;
+}
+
+.cert-intro-text {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.cert-student-name {
+  font: 800 clamp(24px, 3.8vw, 38px)/1.2 var(--font-heading);
+  color: #112d0e;
+  border-bottom: 2px solid #d4c285;
+  display: inline-block;
+  padding: 4px 28px 8px;
+  margin: 6px 0 16px;
+}
+
+.cert-statement {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink-light);
+  max-width: 680px;
+  margin: 0 auto 20px;
+  text-wrap: pretty;
+}
+
+.cert-skills-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto 26px;
+  max-width: 720px;
+}
+
+.cert-skill-pill {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green-dark);
+  background: var(--green-pale);
+  border: 1px solid #d0e7c6;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.cert-meta-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  border-top: 1px solid #e5ecd8;
+  padding-top: 20px;
+  margin-top: 10px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cert-meta-left {
+  text-align: left;
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cert-meta-left strong {
+  color: var(--ink);
+  font-family: var(--font-code);
+}
+
+.cert-seal {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px dashed #b79a4a;
+  display: grid;
+  place-items: center;
+  color: #92752c;
+  background: #fdfbf5;
+}
+
+.cert-signature {
+  text-align: right;
+  min-width: 170px;
+}
+
+.cert-signature-line {
+  border-top: 1.5px solid #2d4525;
+  padding-top: 6px;
+  margin-top: 18px;
+}
+
+.cert-signature strong {
+  font: 700 14px var(--font-heading);
+  color: var(--ink);
+  display: block;
+}
+
+.cert-signature span {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+/* Email Feedback Banner inside Modal */
+.cert-email-status-banner {
+  width: 100%;
+  max-width: 880px;
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.cert-email-status-banner.is-sending {
+  background: #f4fbf0;
+  border: 1px solid #c7e5bc;
+  color: var(--green-dark);
+}
+
+.cert-email-status-banner.is-sent {
+  background: #eef8eb;
+  border: 1px solid #aade9d;
+  color: #1a5e0b;
+}
+
+.cert-email-status-banner.is-error {
+  background: #fff8f6;
+  border: 1px solid #f9cdb8;
+  color: #9c2e0b;
+}
+
+/* Print CSS: Only print the certificate */
+@media print {
+  body {
+    background: #fff !important;
+  }
+  .app-shell, .topbar, .sidebar, .main-content, .cert-modal-topbar, .cert-modal-actions, .app-modal-close-btn, .cert-email-status-banner {
+    display: none !important;
+  }
+  .app-modal-backdrop {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
+  }
+  .cert-modal-box {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  .cert-scroll-area {
+    padding: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+  }
+  .certificate-frame {
+    box-shadow: none !important;
+    border: 3px double #b79a4a !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  @page {
+    size: landscape;
+    margin: 1cm;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     scroll-behavior: auto !important;

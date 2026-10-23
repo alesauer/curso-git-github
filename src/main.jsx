@@ -1,15 +1,82 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
+import emailjs from '@emailjs/browser'
+import confetti from 'canvas-confetti'
 import {
-  AlertTriangle, BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, ChevronsRight,
-  CircleHelp, Clipboard, Clock3, Code2, Command, Compass, Cpu, Download, ExternalLink, FileCode2,
+  AlertTriangle, Award, BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, ChevronsRight,
+  CircleHelp, Clipboard, Clock3, Code2, Command, Compass, Cpu, Download, Edit3, ExternalLink, FileCode2,
   GitBranch, GitCommitHorizontal, GitFork, GitPullRequest, Github, Globe, GraduationCap,
-  Home, Layers, Lightbulb, Menu, PanelLeftClose, PanelLeftOpen, Play, Rocket, Search, Settings,
-  ShieldCheck, Sparkles, Terminal, Users, Workflow, X
+  Home, Layers, Lightbulb, Mail, Menu, PanelLeftClose, PanelLeftOpen, Play, Printer, Rocket, Search,
+  Send, Settings, ShieldCheck, Sparkles, Terminal, User, UserCheck, Users, Workflow, X
 } from 'lucide-react'
 import './styles.css'
 
 const repoUrl = 'https://github.com/alesauer/tutorial-git'
+
+const STORAGE_KEYS = {
+  STUDENT: 'git_course_student',
+  COMPLETED: 'git_course_completed',
+  CHECKED: 'git_course_checked',
+  SENT_PREFIX: 'git_course_email_sent_'
+}
+
+function loadFromStorage(key, fallback) {
+  try {
+    const item = localStorage.getItem(key)
+    return item ? JSON.parse(item) : fallback
+  } catch (err) {
+    return fallback
+  }
+}
+
+function saveToStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch (err) {
+    console.error('Erro ao salvar no localStorage:', err)
+  }
+}
+
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || ''
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || ''
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || ''
+
+function generateCertificateCode(name, dateStr) {
+  const base = `${name || 'ESTUDANTE'}-${dateStr || ''}-GIT-GITHUB-SAUER`.toUpperCase()
+  let hash = 0
+  for (let i = 0; i < base.length; i++) {
+    hash = ((hash << 5) - hash) + base.charCodeAt(i)
+    hash |= 0
+  }
+  const hex = Math.abs(hash).toString(16).toUpperCase().padStart(8, '0')
+  return `GIT-${hex.slice(0, 4)}-${hex.slice(4, 8)}`
+}
+
+async function sendCertificateEmail(student, certCode, issueDate) {
+  if (EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID && EMAILJS_PUBLIC_KEY) {
+    const templateParams = {
+      to_name: student.name,
+      to_email: student.email,
+      certificate_code: certCode,
+      completion_date: issueDate,
+      course_name: 'Curso Prático de Git e GitHub do Prof. S@uer',
+      course_hours: '3 horas de prática intensiva',
+      skills: 'Git Bash, Configuração, add, commit, push, pull, branches, merge, pull requests, cherry-pick, stash, bisect e rebase',
+      site_url: window.location.origin
+    }
+    const res = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_PUBLIC_KEY)
+    return { success: true, simulated: false, res }
+  }
+
+  // Fallback simulado para desenvolvimento e demonstração caso as credenciais não estejam no .env
+  await new Promise(resolve => setTimeout(resolve, 1200))
+  console.info('[EmailJS Simulação] Certificado despachado:', { student, certCode, issueDate })
+  return {
+    success: true,
+    simulated: true,
+    message: 'Envio simulado com sucesso! Para envio real por e-mail, configure suas credenciais no arquivo .env.'
+  }
+}
 
 const modules = [
   {
@@ -567,301 +634,721 @@ function ConceptsPage({ onStartCourse, onBackHome }) {
   )
 }
 
+function RegisterModal({ isOpen, onClose, currentStudent, onSave }) {
+  if (!isOpen) return null
+
+  const [name, setName] = useState(currentStudent?.name || '')
+  const [email, setEmail] = useState(currentStudent?.email || '')
+  const [error, setError] = useState('')
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const trimmedName = name.trim()
+    const trimmedEmail = email.trim().toLowerCase()
+
+    if (trimmedName.length < 3) {
+      setError('Por favor, informe seu nome completo (mínimo de 3 caracteres).')
+      return
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(trimmedEmail)) {
+      setError('Por favor, informe um endereço de e-mail válido.')
+      return
+    }
+
+    setError('')
+    onSave({
+      name: trimmedName,
+      email: trimmedEmail,
+      registeredAt: currentStudent?.registeredAt || new Date().toISOString()
+    })
+    onClose()
+  }
+
+  return (
+    <div className="app-modal-backdrop" onClick={currentStudent ? onClose : undefined} role="dialog" aria-modal="true">
+      <div className="app-modal-box" onClick={(e) => e.stopPropagation()}>
+        <div className="app-modal-header">
+          <div>
+            <div className="section-kicker">IDENTIFICAÇÃO DO ALUNO</div>
+            <h3>{currentStudent ? 'Editar Cadastro do Estudante' : 'Identificação para o Certificado'}</h3>
+            <p>
+              {currentStudent
+                ? 'Atualize seu nome ou e-mail cadastrado.'
+                : 'Cadastre seu nome e e-mail para registrar suas conquistas e receber seu certificado oficial ao concluir o curso.'}
+            </p>
+          </div>
+          {currentStudent && (
+            <button className="app-modal-close-btn" onClick={onClose} aria-label="Fechar modal">
+              <X size={18} />
+            </button>
+          )}
+        </div>
+
+        <form onSubmit={handleSubmit} className="app-modal-body">
+          {error && (
+            <div className="step-warning-box" style={{ margin: '0 0 16px', padding: '10px 14px' }}>
+              <AlertTriangle size={16} />
+              <div><span>{error}</span></div>
+            </div>
+          )}
+
+          <div className="form-group">
+            <label htmlFor="student-name">Nome completo (para emissão do certificado)</label>
+            <input
+              id="student-name"
+              type="text"
+              placeholder="Ex: Maria Clara de Souza"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoFocus
+              required
+            />
+            <span className="form-hint">O nome digitado será impresso exatamente como inserido no certificado oficial.</span>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="student-email">E-mail para envio do certificado</label>
+            <input
+              id="student-email"
+              type="email"
+              placeholder="seu-email@exemplo.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <span className="form-hint">Ao atingir 100% de conclusão, você receberá a notificação oficial neste e-mail.</span>
+          </div>
+
+          <div className="form-actions">
+            {currentStudent && (
+              <button type="button" className="secondary-btn" onClick={onClose}>
+                Cancelar
+              </button>
+            )}
+            <button type="submit" className="primary-btn">
+              <Check size={16} /> {currentStudent ? 'Salvar Alterações' : 'Iniciar Minha Jornada'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+function CertificateModal({ isOpen, onClose, student, issueDate, emailStatus, emailMsg, onResendEmail }) {
+  if (!isOpen) return null
+
+  const certCode = generateCertificateCode(student?.name, issueDate)
+
+  const handlePrint = () => {
+    window.print()
+  }
+
+  const skillsList = [
+    'Git Core & Git Bash no Windows',
+    'Autoria & Identidade Git (config)',
+    'Ciclo de Vida: Add, Commit, Push & Pull',
+    'Branches, Merge & Resolução de Conflitos',
+    'GitHub, Forks & Pull Requests',
+    'Git Stash, Cherry-pick & Bisect',
+    'Git Rebase Interativo & Boas Práticas'
+  ]
+
+  return (
+    <div className="app-modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="cert-modal-box app-modal-box" onClick={(e) => e.stopPropagation()}>
+        <div className="cert-modal-topbar">
+          <strong>
+            <Award size={20} /> Certificado Oficial de Conclusão
+          </strong>
+          <div className="cert-modal-actions">
+            <button
+              className="secondary-btn"
+              onClick={onResendEmail}
+              title="Reenviar certificado por e-mail"
+              disabled={emailStatus === 'sending'}
+            >
+              {emailStatus === 'sending' ? <Clock3 size={15} /> : <Mail size={15} />}
+              {emailStatus === 'sending' ? 'Enviando...' : 'Reenviar por E-mail'}
+            </button>
+            <button className="primary-btn" onClick={handlePrint} title="Imprimir certificado ou salvar em PDF">
+              <Printer size={15} /> Imprimir / Salvar PDF
+            </button>
+            <button className="app-modal-close-btn" onClick={onClose} aria-label="Fechar">
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+
+        <div className="cert-scroll-area">
+          {emailStatus === 'sending' && (
+            <div className="cert-email-status-banner is-sending">
+              <Clock3 size={18} />
+              <div>
+                <strong>Enviando certificado por e-mail...</strong>
+                <span>Despachando notificação para <b>{student?.email}</b>.</span>
+              </div>
+            </div>
+          )}
+          {emailStatus === 'sent' && (
+            <div className="cert-email-status-banner is-sent">
+              <CheckCircle2 size={18} />
+              <div>
+                <strong>Certificado enviado com sucesso!</strong>
+                <span>{emailMsg || `Uma cópia de confirmação foi enviada para ${student?.email}.`}</span>
+              </div>
+            </div>
+          )}
+          {emailStatus === 'error' && (
+            <div className="cert-email-status-banner is-error">
+              <AlertTriangle size={18} />
+              <div>
+                <strong>Atenção no envio do e-mail:</strong>
+                <span>{emailMsg || 'Não foi possível despachar o e-mail automaticamente. Você pode tentar reenviar ou salvar como PDF.'}</span>
+              </div>
+            </div>
+          )}
+
+          <div className="certificate-frame">
+            <div className="certificate-inner">
+              <div className="cert-badge-row">
+                <span className="cert-kicker">CURSO PRÁTICO OFICIAL · RECONHECIMENTO DE MÉRITO</span>
+              </div>
+              <h1>Certificado de Conclusão</h1>
+              <p className="cert-intro-text">Certificamos com distinção acadêmica e técnica que</p>
+              <div className="cert-student-name">{student?.name || 'Estudante'}</div>
+              <p className="cert-statement">
+                concluiu com aproveitamento integral todos os <strong>7 módulos práticos</strong> e atividades do{' '}
+                <strong>Curso Git / GitHub do Prof. S@uer</strong>, acumulando carga horária estimada de{' '}
+                <strong>3 horas de desenvolvimento prático</strong> e demonstrando competência nas seguintes áreas:
+              </p>
+
+              <div className="cert-skills-pills">
+                {skillsList.map((skill) => (
+                  <span className="cert-skill-pill" key={skill}>
+                    ✓ {skill}
+                  </span>
+                ))}
+              </div>
+
+              <div className="cert-meta-footer">
+                <div className="cert-meta-left">
+                  <span>Data de emissão: <strong>{issueDate}</strong></span>
+                  <span>Código de autenticação: <strong>{certCode}</strong></span>
+                  <span>E-mail do titular: <strong>{student?.email}</strong></span>
+                </div>
+
+                <div className="cert-seal" title="Certificado Verificado 100%">
+                  <Award size={36} />
+                </div>
+
+                <div className="cert-signature">
+                  <div className="cert-signature-line" />
+                  <strong>Prof. S@uer</strong>
+                  <span>Instrutor & Especialista Git/GitHub</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [activeId, setActiveId] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [completed, setCompleted] = useState({})
-  const [checked, setChecked] = useState({})
+  const [completed, setCompleted] = useState(() => loadFromStorage(STORAGE_KEYS.COMPLETED, {}))
+  const [checked, setChecked] = useState(() => loadFromStorage(STORAGE_KEYS.CHECKED, {}))
   const [mobileMenu, setMobileMenu] = useState(false)
+
+  // Registration & Certificate State
+  const [student, setStudent] = useState(() => loadFromStorage(STORAGE_KEYS.STUDENT, null))
+  const [showRegisterModal, setShowRegisterModal] = useState(false)
+  const [pendingModule, setPendingModule] = useState(null)
+  const [showCertModal, setShowCertModal] = useState(false)
+  const [certEmailStatus, setCertEmailStatus] = useState('idle')
+  const [certEmailMsg, setCertEmailMsg] = useState('')
+  const [issueDate] = useState(() =>
+    new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+  )
+
   const activeModule = activeId ? modules.find(m => m.id === activeId) : null
   const completedCount = modules.filter(m => completed[m.id]).length
-  const progress = Math.round((completedCount / modules.length) * 100)
-  const selectModule = (id) => { setActiveId(id); setMobileMenu(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }
-  const toggleCheck = (moduleId, itemIndex) => setChecked(prev => ({ ...prev, [`${moduleId}-${itemIndex}`]: !prev[`${moduleId}-${itemIndex}`] }))
-  const markComplete = () => { if (activeId) setCompleted(prev => ({ ...prev, [activeId]: !prev[activeId] })) }
+  const totalChecks = modules.reduce((sum, m) => sum + m.check.length, 0)
+  const checkedCount = modules.reduce((sum, m) => sum + m.check.filter((_, i) => checked[`${m.id}-${i}`]).length, 0)
 
-  return <div className={`app-shell ${sidebarOpen ? '' : 'sidebar-collapsed'}`}>
-    <header className="topbar">
-      <div className="brand" onClick={() => selectModule(null)} role="button" tabIndex={0} title="Voltar ao início">
-        <div className="brand-mark"><GitBranch size={21}/></div>
-        <div className="brand-text"><strong>Curso Git / GitHub</strong><span>do Prof. S@uer</span></div>
-      </div>
-      <div className="top-actions">
-        <a className="repo-link" href={repoUrl} target="_blank" rel="noreferrer">
-          <Github size={17}/> Repositório do curso <ExternalLink size={13}/>
-        </a>
-        <button className="mobile-menu-btn" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Abrir navegação">
-          {mobileMenu ? <X/> : <Menu/>}
-        </button>
-      </div>
-    </header>
+  // Progress: 50% from modules completed + 50% from checklist items
+  const progress = Math.min(
+    100,
+    Math.round(
+      ((completedCount / modules.length) * 50) +
+      (totalChecks > 0 ? (checkedCount / totalChecks) * 50 : 0)
+    )
+  )
 
-    <div className="layout">
-      <aside className={`sidebar ${mobileMenu ? 'mobile-open' : ''}`} aria-label="Navegação do curso">
-        <div className="sidebar-head">
-          <div><span className="sidebar-label">CONTEÚDO DO CURSO</span><h2>Trilha de aprendizagem</h2></div>
-          <button className="collapse-btn" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label={sidebarOpen ? 'Recolher menu' : 'Expandir menu'}>
-            {sidebarOpen ? <PanelLeftClose size={18}/> : <PanelLeftOpen size={18}/>}
-          </button>
+  const selectModule = (id) => {
+    setActiveId(id)
+    setMobileMenu(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleStartCourse = (targetModuleId = 1) => {
+    if (!student) {
+      setPendingModule(targetModuleId)
+      setShowRegisterModal(true)
+    } else {
+      selectModule(targetModuleId)
+    }
+  }
+
+  const handleSaveStudent = (newStudentData) => {
+    setStudent(newStudentData)
+    saveToStorage(STORAGE_KEYS.STUDENT, newStudentData)
+    if (pendingModule) {
+      selectModule(pendingModule)
+      setPendingModule(null)
+    }
+  }
+
+  const toggleCheck = (moduleId, itemIndex) => {
+    setChecked(prev => {
+      const next = { ...prev, [`${moduleId}-${itemIndex}`]: !prev[`${moduleId}-${itemIndex}`] }
+      saveToStorage(STORAGE_KEYS.CHECKED, next)
+      return next
+    })
+  }
+
+  const markComplete = () => {
+    if (activeId) {
+      setCompleted(prev => {
+        const next = { ...prev, [activeId]: !prev[activeId] }
+        saveToStorage(STORAGE_KEYS.COMPLETED, next)
+        return next
+      })
+    }
+  }
+
+  // Automatic celebration and email dispatch when reaching 100%
+  useEffect(() => {
+    if (progress === 100) {
+      if (!student) {
+        setShowRegisterModal(true)
+        return
+      }
+
+      const emailSentKey = `${STORAGE_KEYS.SENT_PREFIX}${student.email}`
+      const alreadySent = localStorage.getItem(emailSentKey)
+
+      if (!alreadySent) {
+        try {
+          confetti({
+            particleCount: 140,
+            spread: 80,
+            origin: { y: 0.6 }
+          })
+        } catch (e) {
+          console.warn('Confetti error:', e)
+        }
+
+        const certCode = generateCertificateCode(student.name, issueDate)
+        setCertEmailStatus('sending')
+        setCertEmailMsg('')
+
+        sendCertificateEmail(student, certCode, issueDate)
+          .then((result) => {
+            setCertEmailStatus('sent')
+            if (result.simulated) {
+              setCertEmailMsg(result.message)
+            } else {
+              setCertEmailMsg(`Certificado enviado para ${student.email}.`)
+            }
+            try {
+              localStorage.setItem(emailSentKey, 'true')
+            } catch (err) {}
+          })
+          .catch((err) => {
+            console.error('Erro ao enviar certificado:', err)
+            setCertEmailStatus('error')
+            setCertEmailMsg(err.text || err.message || 'Falha ao enviar e-mail.')
+          })
+
+        setShowCertModal(true)
+      }
+    }
+  }, [progress, student, issueDate])
+
+  const handleResendEmail = async () => {
+    if (!student?.email) {
+      setShowRegisterModal(true)
+      return
+    }
+    const certCode = generateCertificateCode(student.name, issueDate)
+    setCertEmailStatus('sending')
+    setCertEmailMsg('')
+    try {
+      const result = await sendCertificateEmail(student, certCode, issueDate)
+      setCertEmailStatus('sent')
+      if (result.simulated) {
+        setCertEmailMsg(result.message)
+      } else {
+        setCertEmailMsg(`Certificado reenviado com sucesso para ${student.email}!`)
+      }
+    } catch (err) {
+      console.error('Erro ao reenviar certificado:', err)
+      setCertEmailStatus('error')
+      setCertEmailMsg(err.text || err.message || 'Não foi possível reenviar o e-mail.')
+    }
+  }
+
+  return (
+    <div className={`app-shell ${sidebarOpen ? '' : 'sidebar-collapsed'}`}>
+      <header className="topbar">
+        <div className="brand" onClick={() => selectModule(null)} role="button" tabIndex={0} title="Voltar ao início">
+          <div className="brand-mark"><GitBranch size={21}/></div>
+          <div className="brand-text"><strong>Curso Git / GitHub</strong><span>do Prof. S@uer</span></div>
         </div>
-        <div className="progress-box">
-          <div className="progress-label"><span>Seu progresso</span><strong>{progress}%</strong></div>
-          <div className="progress-track"><div className="progress-fill" style={{ width: `${progress}%` }}/></div>
-          <span className="progress-caption">{completedCount} de {modules.length} módulos concluídos</span>
-        </div>
-        <nav className="module-nav">
-          <button
-            className={`module-link ${activeId === null ? 'active' : ''}`}
-            onClick={() => selectModule(null)}
-            title="Início do curso"
-          >
-            <span className="module-icon"><Home size={18}/></span>
-            <span className="module-text">
-              <strong>Início · Apresentação</strong>
-              <small>Visão geral</small>
-            </span>
-            <span className="module-state">
-              {activeId === null ? <span className="active-dot"/> : null}
-            </span>
-          </button>
-          <button
-            className={`module-link ${activeId === 'concepts' ? 'active' : ''}`}
-            onClick={() => selectModule('concepts')}
-            title="Entenda Antes de Praticar: Funcionamento, características e possibilidades"
-          >
-            <span className="module-icon"><Compass size={18}/></span>
-            <span className="module-text">
-              <strong>Entenda Antes de Praticar</strong>
-              <small>Fundamentos e conceitos</small>
-            </span>
-            <span className="module-state">
-              {activeId === 'concepts' ? <span className="active-dot"/> : null}
-            </span>
-          </button>
-          {modules.map(module => {
-            const Icon = module.icon;
-            const isActive = module.id === activeId;
-            return <button key={module.id} className={`module-link ${isActive ? 'active' : ''}`} onClick={() => selectModule(module.id)} title={module.title}>
-              <span className="module-icon"><Icon size={18}/></span>
-              <span className="module-text"><strong>{String(module.id).padStart(2, '0')} · {module.title}</strong><small>{module.short}</small></span>
-              <span className="module-state">{completed[module.id] ? <CheckCircle2 size={17}/> : isActive ? <span className="active-dot"/> : <span className="module-empty"/>}</span>
+        <div className="top-actions">
+          {student ? (
+            <button
+              className="student-profile-btn"
+              onClick={() => setShowRegisterModal(true)}
+              title="Clique para ver ou editar seu cadastro de estudante"
+            >
+              <span className="student-avatar"><UserCheck size={13} /></span>
+              <span>{student.name.split(' ')[0]}</span>
+              <Edit3 size={12} className="student-edit-icon" />
             </button>
-          })}
-        </nav>
-        <div className="sidebar-bottom">
-          <div className="help-icon"><CircleHelp size={18}/></div>
-          <div className="help-copy"><strong>Precisa de ajuda?</strong><span>Consulte a documentação oficial.</span><a href="https://git-scm.com/doc" target="_blank" rel="noreferrer">Documentação Git <ExternalLink size={12}/></a></div>
+          ) : (
+            <button
+              className="student-register-btn"
+              onClick={() => { setPendingModule(null); setShowRegisterModal(true) }}
+              title="Cadastre seu nome e e-mail para o certificado"
+            >
+              <User size={14} /> Cadastrar Estudante
+            </button>
+          )}
+
+          {progress === 100 && (
+            <button
+              className="top-cert-btn"
+              onClick={() => setShowCertModal(true)}
+              title="Visualizar e imprimir seu Certificado Oficial de Conclusão"
+            >
+              <Award size={16} /> Ver Certificado
+            </button>
+          )}
+
+          <a className="repo-link" href={repoUrl} target="_blank" rel="noreferrer">
+            <Github size={17}/> Repositório do curso <ExternalLink size={13}/>
+          </a>
+          <button className="mobile-menu-btn" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Abrir navegação">
+            {mobileMenu ? <X/> : <Menu/>}
+          </button>
         </div>
-        <a className="github-card" href={repoUrl} target="_blank" rel="noreferrer">
-          <Github size={20}/>
-          <span><strong>Repositório de laboratório</strong><small>alesauer/tutorial-git</small></span>
-          <ExternalLink size={14}/>
-        </a>
-      </aside>
+      </header>
 
-      {!sidebarOpen && (
-        <button className="expand-floating" onClick={() => setSidebarOpen(true)} aria-label="Expandir navegação">
-          <ChevronsRight size={19}/><span>Conteúdo</span>
-        </button>
-      )}
-
-      {mobileMenu && <button className="mobile-backdrop" aria-label="Fechar menu" onClick={() => setMobileMenu(false)}/>}
-
-      <main className="main-content">
-        {activeId === null ? (
-          <div className="home-view">
-            <section className="welcome-card">
-              <div className="welcome-copy">
-                <div className="eyebrow"><span className="eyebrow-dot"/> TRILHA PRÁTICA DE DESENVOLVIMENTO</div>
-                <h1>Domine o Git.<br/><span>Colabore com confiança.</span></h1>
-                <p>Aprenda a controlar versões, organizar seu trabalho e colaborar em projetos reais usando Git e GitHub.</p>
-                <div className="welcome-actions">
-                  <button className="primary-btn" onClick={() => selectModule(1)}>
-                    <Play size={16} fill="currentColor"/> Começar o curso
-                  </button>
-                  <button className="secondary-btn" onClick={() => selectModule('concepts')} title="Entenda o funcionamento, características e possibilidades antes de praticar">
-                    <Compass size={16}/> Entenda Antes de Praticar
-                  </button>
-                  <a href={repoUrl} target="_blank" rel="noreferrer" className="text-link">
-                    Ver repositório <ExternalLink size={14}/>
-                  </a>
-                </div>
-              </div>
-              <div className="welcome-illustration" aria-hidden="true">
-                <div className="orbit orbit-one"/>
-                <div className="orbit orbit-two"/>
-                <div className="git-tile"><GitBranch size={54}/></div>
-                <div className="float-card float-card-top"><GitCommitHorizontal size={17}/><span>commit</span><CheckCircle2 size={15}/></div>
-                <div className="float-card float-card-bottom"><GitPullRequest size={17}/><span>pull request</span></div>
-                <div className="green-spark spark-one"/>
-                <div className="green-spark spark-two"/>
-              </div>
-            </section>
-
-            <section className="stats-row" aria-label="Informações do curso">
-              <div className="stat-card"><div className="stat-icon"><BookOpen size={19}/></div><div><strong>7 módulos</strong><span>Do básico ao avançado</span></div></div>
-              <div className="stat-card"><div className="stat-icon"><Clock3 size={19}/></div><div><strong>~3 horas</strong><span>Conteúdo prático</span></div></div>
-              <div className="stat-card"><div className="stat-icon"><Users size={19}/></div><div><strong>Aprenda fazendo</strong><span>Exercícios e colaboração</span></div></div>
-            </section>
+      <div className="layout">
+        <aside className={`sidebar ${mobileMenu ? 'mobile-open' : ''}`} aria-label="Navegação do curso">
+          <div className="sidebar-head">
+            <div><span className="sidebar-label">CONTEÚDO DO CURSO</span><h2>Trilha de aprendizagem</h2></div>
+            <button className="collapse-btn" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label={sidebarOpen ? 'Recolher menu' : 'Expandir menu'}>
+              {sidebarOpen ? <PanelLeftClose size={18}/> : <PanelLeftOpen size={18}/>}
+            </button>
           </div>
-        ) : activeId === 'concepts' ? (
-          <ConceptsPage onStartCourse={() => selectModule(1)} onBackHome={() => selectModule(null)} />
-        ) : (
-          <div className="lesson-view">
-            <div className="breadcrumb">
-              <button className="breadcrumb-btn" onClick={() => selectModule(null)}>
-                <Home size={13}/> Início
-              </button>
-              <ChevronRight size={14}/>
-              <span>{`Módulo ${activeId}`}</span>
-              <ChevronRight size={14}/>
-              <strong>{activeModule.title}</strong>
-            </div>
-
-            <section className="lesson-heading">
-              <div>
-                <div className="section-kicker">SEU CONTEÚDO</div>
-                <h2>{activeModule.title}</h2>
-                <p>{activeModule.intro}</p>
-              </div>
-              <span className="duration"><Clock3 size={14}/>{activeModule.duration}</span>
-            </section>
-
-            <div className="objective-card">
-              <div className="objective-icon"><GraduationCap size={20}/></div>
-              <div>
-                <strong>Objetivo desta etapa</strong>
-                <p>{activeModule.objective}</p>
-              </div>
-            </div>
-
-            <section className="steps-section">
-              <div className="section-title-row">
-                <h3>Passo a passo</h3>
-                <span>{activeModule.steps.length} etapas</span>
-              </div>
-              <div className="steps-list">
-                {activeModule.steps.map((step, index) => (
-                  <article className="step-card" key={`${activeId}-${step.title}`}>
-                    <div className="step-number">{String(index + 1).padStart(2, '0')}</div>
-                    <div className="step-body">
-                      <h4>{step.title}</h4>
-                      <p className="step-desc">{step.text}</p>
-                      {step.links && (
-                        <div className="step-links-row">
-                          {step.links.map(link => (
-                            <a
-                              key={link.url}
-                              href={link.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="step-link-badge"
-                            >
-                              <ExternalLink size={13}/> {link.label}
-                            </a>
-                          ))}
-                        </div>
-                      )}
-                      {step.tip && (
-                        <div className="step-tip-box">
-                          <Lightbulb size={18}/>
-                          <div>
-                            <strong>Dica do Professor:</strong>
-                            <span>{step.tip}</span>
-                          </div>
-                        </div>
-                      )}
-                      {step.warning && (
-                        <div className="step-warning-box">
-                          <AlertTriangle size={18}/>
-                          <div>
-                            <strong>Atenção / Segurança:</strong>
-                            <span>{step.warning}</span>
-                          </div>
-                        </div>
-                      )}
-                      {step.code && <CodeSnippet code={step.code} lang={step.lang}/>}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
-
-            <section className="exercise-card">
-              <div className="exercise-header">
-                <div className="exercise-icon"><FileCode2 size={19}/></div>
-                <div>
-                  <span className="section-kicker">MÃO NA MASSA</span>
-                  <h3>Exercício prático</h3>
-                </div>
-              </div>
-              <p>{activeModule.exercise}</p>
-              <div className="exercise-repo">
-                <Github size={16}/>
-                <span>Repositório utilizado nos testes</span>
-                <a href={repoUrl} target="_blank" rel="noreferrer">
-                  alesauer/tutorial-git <ExternalLink size={13}/>
-                </a>
-              </div>
-            </section>
-
-            <section className="checklist-card">
-              <div className="section-title-row">
-                <div>
-                  <h3>Checklist de aprendizagem</h3>
-                  <p>Marque os itens que você já concluiu nesta etapa.</p>
-                </div>
-                <span className="check-count">
-                  {activeModule.check.filter((_, i) => checked[`${activeId}-${i}`]).length}/{activeModule.check.length}
-                </span>
-              </div>
-              <div className="checklist">
-                {activeModule.check.map((item, index) => (
-                  <label className={`check-item ${checked[`${activeId}-${index}`] ? 'checked' : ''}`} key={item}>
-                    <input
-                      type="checkbox"
-                      checked={!!checked[`${activeId}-${index}`]}
-                      onChange={() => toggleCheck(activeId, index)}
-                    />
-                    <span className="custom-check"><Check size={13}/></span>
-                    <span>{item}</span>
-                  </label>
-                ))}
-              </div>
-            </section>
-
-            <div className="lesson-footer">
-              <button
-                className="secondary-btn"
-                onClick={() => activeId === 1 ? selectModule(null) : selectModule(activeId - 1)}
-              >
-                <ChevronLeft size={16}/> {activeId === 1 ? 'Início' : 'Módulo anterior'}
-              </button>
-              <button
-                className={`complete-btn ${completed[activeId] ? 'is-complete' : ''}`}
-                onClick={markComplete}
-              >
-                {completed[activeId] ? <CheckCircle2 size={17}/> : <Check size={17}/>}{' '}
-                {completed[activeId] ? 'Etapa concluída' : 'Marcar como concluída'}
-              </button>
-              <button
-                className="primary-btn next-btn"
-                disabled={activeId === modules.length}
-                onClick={() => selectModule(activeId + 1)}
-              >
-                Próximo módulo <ChevronRight size={16}/>
-              </button>
-            </div>
+          <div className="progress-box">
+            <div className="progress-label"><span>Seu progresso</span><strong>{progress}%</strong></div>
+            <div className="progress-track"><div className="progress-fill" style={{ width: `${progress}%` }}/></div>
+            <span className="progress-caption">{completedCount} de {modules.length} módulos concluídos</span>
           </div>
+
+          {progress === 100 && (
+            <button
+              className="sidebar-cert-banner"
+              onClick={() => setShowCertModal(true)}
+              title="Clique para ver ou imprimir seu Certificado Oficial"
+            >
+              <div className="cert-banner-icon"><Award size={20} /></div>
+              <div>
+                <strong>100% Concluído!</strong>
+                <span>Ver Certificado Oficial</span>
+              </div>
+            </button>
+          )}
+
+          <nav className="module-nav">
+            <button
+              className={`module-link ${activeId === null ? 'active' : ''}`}
+              onClick={() => selectModule(null)}
+              title="Início do curso"
+            >
+              <span className="module-icon"><Home size={18}/></span>
+              <span className="module-text">
+                <strong>Início · Apresentação</strong>
+                <small>Visão geral</small>
+              </span>
+              <span className="module-state">
+                {activeId === null ? <span className="active-dot"/> : null}
+              </span>
+            </button>
+            <button
+              className={`module-link ${activeId === 'concepts' ? 'active' : ''}`}
+              onClick={() => selectModule('concepts')}
+              title="Entenda Antes de Praticar: Funcionamento, características e possibilidades"
+            >
+              <span className="module-icon"><Compass size={18}/></span>
+              <span className="module-text">
+                <strong>Entenda Antes de Praticar</strong>
+                <small>Fundamentos e conceitos</small>
+              </span>
+              <span className="module-state">
+                {activeId === 'concepts' ? <span className="active-dot"/> : null}
+              </span>
+            </button>
+            {modules.map(module => {
+              const Icon = module.icon;
+              const isActive = module.id === activeId;
+              return <button key={module.id} className={`module-link ${isActive ? 'active' : ''}`} onClick={() => selectModule(module.id)} title={module.title}>
+                <span className="module-icon"><Icon size={18}/></span>
+                <span className="module-text"><strong>{String(module.id).padStart(2, '0')} · {module.title}</strong><small>{module.short}</small></span>
+                <span className="module-state">{completed[module.id] ? <CheckCircle2 size={17}/> : isActive ? <span className="active-dot"/> : <span className="module-empty"/>}</span>
+              </button>
+            })}
+          </nav>
+          <div className="sidebar-bottom">
+            <div className="help-icon"><CircleHelp size={18}/></div>
+            <div className="help-copy"><strong>Precisa de ajuda?</strong><span>Consulte a documentação oficial.</span><a href="https://git-scm.com/doc" target="_blank" rel="noreferrer">Documentação Git <ExternalLink size={12}/></a></div>
+          </div>
+          <a className="github-card" href={repoUrl} target="_blank" rel="noreferrer">
+            <Github size={20}/>
+            <span><strong>Repositório de laboratório</strong><small>alesauer/tutorial-git</small></span>
+            <ExternalLink size={14}/>
+          </a>
+        </aside>
+
+        {!sidebarOpen && (
+          <button className="expand-floating" onClick={() => setSidebarOpen(true)} aria-label="Expandir navegação">
+            <ChevronsRight size={19}/><span>Conteúdo</span>
+          </button>
         )}
 
-        <footer className="footer">
-          <span>Curso Git / GitHub do Prof. S@uer</span>
-          <span>Aprender · Praticar · Colaborar</span>
-        </footer>
-      </main>
+        {mobileMenu && <button className="mobile-backdrop" aria-label="Fechar menu" onClick={() => setMobileMenu(false)}/>}
+
+        <main className="main-content">
+          {activeId === null ? (
+            <div className="home-view">
+              <section className="welcome-card">
+                <div className="welcome-copy">
+                  <div className="eyebrow"><span className="eyebrow-dot"/> TRILHA PRÁTICA DE DESENVOLVIMENTO</div>
+                  <h1>Domine o Git.<br/><span>Colabore com confiança.</span></h1>
+                  <p>Aprenda a controlar versões, organizar seu trabalho e colaborar em projetos reais usando Git e GitHub.</p>
+                  <div className="welcome-actions">
+                    <button className="primary-btn" onClick={() => handleStartCourse(1)}>
+                      <Play size={16} fill="currentColor"/> Começar o curso
+                    </button>
+                    <button className="secondary-btn" onClick={() => selectModule('concepts')} title="Entenda o funcionamento, características e possibilidades antes de praticar">
+                      <Compass size={16}/> Entenda Antes de Praticar
+                    </button>
+                    <a href={repoUrl} target="_blank" rel="noreferrer" className="text-link">
+                      Ver repositório <ExternalLink size={14}/>
+                    </a>
+                  </div>
+                </div>
+                <div className="welcome-illustration" aria-hidden="true">
+                  <div className="orbit orbit-one"/>
+                  <div className="orbit orbit-two"/>
+                  <div className="git-tile"><GitBranch size={54}/></div>
+                  <div className="float-card float-card-top"><GitCommitHorizontal size={17}/><span>commit</span><CheckCircle2 size={15}/></div>
+                  <div className="float-card float-card-bottom"><GitPullRequest size={17}/><span>pull request</span></div>
+                  <div className="green-spark spark-one"/>
+                  <div className="green-spark spark-two"/>
+                </div>
+              </section>
+
+              <section className="stats-row" aria-label="Informações do curso">
+                <div className="stat-card"><div className="stat-icon"><BookOpen size={19}/></div><div><strong>7 módulos</strong><span>Do básico ao avançado</span></div></div>
+                <div className="stat-card"><div className="stat-icon"><Clock3 size={19}/></div><div><strong>~3 horas</strong><span>Conteúdo prático</span></div></div>
+                <div className="stat-card"><div className="stat-icon"><Users size={19}/></div><div><strong>Aprenda fazendo</strong><span>Exercícios e colaboração</span></div></div>
+              </section>
+            </div>
+          ) : activeId === 'concepts' ? (
+            <ConceptsPage onStartCourse={() => handleStartCourse(1)} onBackHome={() => selectModule(null)} />
+          ) : (
+            <div className="lesson-view">
+              <div className="breadcrumb">
+                <button className="breadcrumb-btn" onClick={() => selectModule(null)}>
+                  <Home size={13}/> Início
+                </button>
+                <ChevronRight size={14}/>
+                <span>{`Módulo ${activeId}`}</span>
+                <ChevronRight size={14}/>
+                <strong>{activeModule.title}</strong>
+              </div>
+
+              <section className="lesson-heading">
+                <div>
+                  <div className="section-kicker">SEU CONTEÚDO</div>
+                  <h2>{activeModule.title}</h2>
+                  <p>{activeModule.intro}</p>
+                </div>
+                <span className="duration"><Clock3 size={14}/>{activeModule.duration}</span>
+              </section>
+
+              <div className="objective-card">
+                <div className="objective-icon"><GraduationCap size={20}/></div>
+                <div>
+                  <strong>Objetivo desta etapa</strong>
+                  <p>{activeModule.objective}</p>
+                </div>
+              </div>
+
+              <section className="steps-section">
+                <div className="section-title-row">
+                  <h3>Passo a passo</h3>
+                  <span>{activeModule.steps.length} etapas</span>
+                </div>
+                <div className="steps-list">
+                  {activeModule.steps.map((step, index) => (
+                    <article className="step-card" key={`${activeId}-${step.title}`}>
+                      <div className="step-number">{String(index + 1).padStart(2, '0')}</div>
+                      <div className="step-body">
+                        <h4>{step.title}</h4>
+                        <p className="step-desc">{step.text}</p>
+                        {step.links && (
+                          <div className="step-links-row">
+                            {step.links.map(link => (
+                              <a
+                                key={link.url}
+                                href={link.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="step-link-badge"
+                              >
+                                <ExternalLink size={13}/> {link.label}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                        {step.tip && (
+                          <div className="step-tip-box">
+                            <Lightbulb size={18}/>
+                            <div>
+                              <strong>Dica do Professor:</strong>
+                              <span>{step.tip}</span>
+                            </div>
+                          </div>
+                        )}
+                        {step.warning && (
+                          <div className="step-warning-box">
+                            <AlertTriangle size={18}/>
+                            <div>
+                              <strong>Atenção / Segurança:</strong>
+                              <span>{step.warning}</span>
+                            </div>
+                          </div>
+                        )}
+                        {step.code && <CodeSnippet code={step.code} lang={step.lang}/>}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+
+              <section className="exercise-card">
+                <div className="exercise-header">
+                  <div className="exercise-icon"><FileCode2 size={19}/></div>
+                  <div>
+                    <span className="section-kicker">MÃO NA MASSA</span>
+                    <h3>Exercício prático</h3>
+                  </div>
+                </div>
+                <p>{activeModule.exercise}</p>
+                <div className="exercise-repo">
+                  <Github size={16}/>
+                  <span>Repositório utilizado nos testes</span>
+                  <a href={repoUrl} target="_blank" rel="noreferrer">
+                    alesauer/tutorial-git <ExternalLink size={13}/>
+                  </a>
+                </div>
+              </section>
+
+              <section className="checklist-card">
+                <div className="section-title-row">
+                  <div>
+                    <h3>Checklist de aprendizagem</h3>
+                    <p>Marque os itens que você já concluiu nesta etapa.</p>
+                  </div>
+                  <span className="check-count">
+                    {activeModule.check.filter((_, i) => checked[`${activeId}-${i}`]).length}/{activeModule.check.length}
+                  </span>
+                </div>
+                <div className="checklist">
+                  {activeModule.check.map((item, index) => (
+                    <label className={`check-item ${checked[`${activeId}-${index}`] ? 'checked' : ''}`} key={item}>
+                      <input
+                        type="checkbox"
+                        checked={!!checked[`${activeId}-${index}`]}
+                        onChange={() => toggleCheck(activeId, index)}
+                      />
+                      <span className="custom-check"><Check size={13}/></span>
+                      <span>{item}</span>
+                    </label>
+                  ))}
+                </div>
+              </section>
+
+              <div className="lesson-footer">
+                <button
+                  className="secondary-btn"
+                  onClick={() => activeId === 1 ? selectModule(null) : selectModule(activeId - 1)}
+                >
+                  <ChevronLeft size={16}/> {activeId === 1 ? 'Início' : 'Módulo anterior'}
+                </button>
+                <button
+                  className={`complete-btn ${completed[activeId] ? 'is-complete' : ''}`}
+                  onClick={markComplete}
+                >
+                  {completed[activeId] ? <CheckCircle2 size={17}/> : <Check size={17}/>}{' '}
+                  {completed[activeId] ? 'Etapa concluída' : 'Marcar como concluída'}
+                </button>
+                <button
+                  className="primary-btn next-btn"
+                  disabled={activeId === modules.length}
+                  onClick={() => selectModule(activeId + 1)}
+                >
+                  Próximo módulo <ChevronRight size={16}/>
+                </button>
+              </div>
+            </div>
+          )}
+
+          <footer className="footer">
+            <span>Curso Git / GitHub do Prof. S@uer</span>
+            <span>Aprender · Praticar · Colaborar</span>
+          </footer>
+        </main>
+      </div>
+
+      <RegisterModal
+        isOpen={showRegisterModal}
+        onClose={() => setShowRegisterModal(false)}
+        currentStudent={student}
+        onSave={handleSaveStudent}
+      />
+
+      <CertificateModal
+        isOpen={showCertModal}
+        onClose={() => setShowCertModal(false)}
+        student={student}
+        issueDate={issueDate}
+        emailStatus={certEmailStatus}
+        emailMsg={certEmailMsg}
+        onResendEmail={handleResendEmail}
+      />
     </div>
-  </div>
+  )
 }
 
 createRoot(document.getElementById('root')).render(<React.StrictMode><App /></React.StrictMode>)
