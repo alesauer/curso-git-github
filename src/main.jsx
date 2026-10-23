@@ -6,7 +6,7 @@ import {
   AlertTriangle, ArrowRight, Award, BookOpen, Camera, Check, CheckCheck, CheckCircle2, ChevronLeft, ChevronRight, ChevronsRight,
   CircleHelp, Clipboard, Clock3, Code2, Command, Compass, Cpu, Download, Edit3, ExternalLink, Eye, FileCode2,
   GitBranch, GitCommitHorizontal, GitFork, GitPullRequest, Github, Globe, GraduationCap,
-  Home, Image as ImageIcon, Layers, Lightbulb, Link2, Mail, Menu, PanelLeftClose, PanelLeftOpen, Play, Printer, Rocket, Search,
+  Home, Image as ImageIcon, Layers, Lightbulb, Link2, LogOut, Mail, Menu, PanelLeftClose, PanelLeftOpen, Play, Printer, Rocket, Search,
   Send, Settings, ShieldCheck, Sparkles, Terminal, Trash2, UploadCloud, User, UserCheck, Users, Workflow, X
 } from 'lucide-react'
 import './styles.css'
@@ -720,7 +720,7 @@ function ConceptsPage({ onStartCourse, onBackHome }) {
   )
 }
 
-function RegisterModal({ isOpen, onClose, currentStudent, onSave }) {
+function RegisterModal({ isOpen, onClose, currentStudent, onSave, onLogout }) {
   if (!isOpen) return null
 
   const [name, setName] = useState(currentStudent?.name || '')
@@ -814,15 +814,28 @@ function RegisterModal({ isOpen, onClose, currentStudent, onSave }) {
             <span className="form-hint">Ao atingir 100% de conclusão com as evidências anexadas, você receberá a notificação oficial neste e-mail.</span>
           </div>
 
-          <div className="form-actions">
-            {currentStudent && (
-              <button type="button" className="secondary-btn" onClick={onClose}>
-                Cancelar
+          <div className={`form-actions ${currentStudent ? 'form-actions-between' : ''}`}>
+            {currentStudent ? (
+              <button
+                type="button"
+                className="modal-logout-btn"
+                onClick={onLogout}
+                title="Sair e limpar os dados deste aluno neste navegador"
+              >
+                <LogOut size={15} /> Sair e Limpar Sessão
               </button>
-            )}
-            <button type="submit" className="primary-btn">
-              <Check size={16} /> {currentStudent ? 'Salvar Alterações' : 'Iniciar Minha Jornada'}
-            </button>
+            ) : null}
+
+            <div className="form-actions-right">
+              {currentStudent && (
+                <button type="button" className="secondary-btn" onClick={onClose}>
+                  Cancelar
+                </button>
+              )}
+              <button type="submit" className="primary-btn">
+                <Check size={16} /> {currentStudent ? 'Salvar Alterações' : 'Iniciar Minha Jornada'}
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -1443,6 +1456,35 @@ function App() {
     }
   }
 
+  const handleLogout = () => {
+    const confirmed = window.confirm(
+      'Deseja realmente sair e limpar a sua sessão?\n\n' +
+      'Isso removerá seus dados cadastrais, progresso e evidências salvas neste navegador, permitindo que um novo estudante inicie o curso.'
+    )
+    if (!confirmed) return
+
+    try {
+      localStorage.removeItem(STORAGE_KEYS.STUDENT)
+      localStorage.removeItem(STORAGE_KEYS.COMPLETED)
+      localStorage.removeItem(STORAGE_KEYS.CHECKED)
+      localStorage.removeItem(STORAGE_KEYS.EVIDENCES)
+      if (student?.email) {
+        localStorage.removeItem(`${STORAGE_KEYS.SENT_PREFIX}${student.email}`)
+      }
+    } catch (err) {
+      console.warn('Erro ao limpar localStorage:', err)
+    }
+
+    setStudent(null)
+    setCompleted({})
+    setChecked({})
+    setEvidences({})
+    setShowRegisterModal(false)
+    setShowCertModal(false)
+    setShowMissingModal(false)
+    setActiveId(null)
+  }
+
   return (
     <div className={`app-shell ${sidebarOpen ? '' : 'sidebar-collapsed'}`}>
       <header className="topbar">
@@ -1452,15 +1494,26 @@ function App() {
         </div>
         <div className="top-actions">
           {student ? (
-            <button
-              className="student-profile-btn"
-              onClick={() => setShowRegisterModal(true)}
-              title="Clique para ver ou editar seu cadastro de estudante"
-            >
-              <span className="student-avatar"><UserCheck size={13} /></span>
-              <span>{student.name.split(' ')[0]}</span>
-              <Edit3 size={12} className="student-edit-icon" />
-            </button>
+            <div className="student-profile-group">
+              <button
+                className="student-profile-btn"
+                onClick={() => setShowRegisterModal(true)}
+                title="Clique para ver ou editar seu cadastro de estudante"
+              >
+                <span className="student-avatar"><UserCheck size={13} /></span>
+                <span>{student.name.split(' ')[0]}</span>
+                <Edit3 size={12} className="student-edit-icon" />
+              </button>
+              <button
+                className="student-logout-topbar-btn"
+                onClick={handleLogout}
+                title="Sair e limpar a sessão deste estudante"
+                aria-label="Sair e limpar sessão"
+              >
+                <LogOut size={13} />
+                <span>Sair</span>
+              </button>
+            </div>
           ) : (
             <button
               className="student-register-btn"
@@ -1852,6 +1905,7 @@ function App() {
         onClose={() => setShowRegisterModal(false)}
         currentStudent={student}
         onSave={handleSaveStudent}
+        onLogout={handleLogout}
       />
 
       <CertificateModal
