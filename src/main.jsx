@@ -53,10 +53,22 @@ function generateCertificateCode(name, dateStr) {
 }
 
 async function sendCertificateEmail(student, certCode, issueDate) {
+  const targetEmail = (student?.email || '').trim().toLowerCase()
+  const targetName = (student?.name || 'Estudante').trim()
+
+  if (!targetEmail) {
+    throw new Error('O e-mail do aluno não está cadastrado. Por favor, clique no botão no topo e cadastre seu e-mail.')
+  }
+
   if (EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID && EMAILJS_PUBLIC_KEY) {
     const templateParams = {
-      to_name: student.name,
-      to_email: student.email,
+      to_name: targetName,
+      to_email: targetEmail,
+      user_email: targetEmail,
+      email: targetEmail,
+      recipient: targetEmail,
+      to: targetEmail,
+      reply_to: targetEmail,
       certificate_code: certCode,
       completion_date: issueDate,
       course_name: 'Curso Prático de Git e GitHub do Prof. S@uer',
