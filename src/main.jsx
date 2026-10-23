@@ -2,9 +2,10 @@ import React, { useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import {
   AlertTriangle, BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, ChevronsRight,
-  CircleHelp, Clipboard, Clock3, Code2, Command, Download, ExternalLink, FileCode2,
-  GitBranch, GitCommitHorizontal, GitFork, GitPullRequest, Github, GraduationCap,
-  Home, Lightbulb, Menu, PanelLeftClose, PanelLeftOpen, Play, Search, Settings, Terminal, Users, X
+  CircleHelp, Clipboard, Clock3, Code2, Command, Compass, Cpu, Download, ExternalLink, FileCode2,
+  GitBranch, GitCommitHorizontal, GitFork, GitPullRequest, Github, Globe, GraduationCap,
+  Home, Layers, Lightbulb, Menu, PanelLeftClose, PanelLeftOpen, Play, Rocket, Search, Settings,
+  ShieldCheck, Sparkles, Terminal, Users, Workflow, X
 } from 'lucide-react'
 import './styles.css'
 
@@ -311,6 +312,261 @@ function CodeSnippet({ code, lang = 'bash' }) {
   </div>
 }
 
+function ConceptsPage({ onStartCourse, onBackHome }) {
+  return (
+    <div className="concepts-view">
+      <div className="breadcrumb">
+        <button className="breadcrumb-btn" onClick={onBackHome}>
+          <Home size={13}/> Início
+        </button>
+        <ChevronRight size={14}/>
+        <span>Fundamentos</span>
+        <ChevronRight size={14}/>
+        <strong>Entenda Antes de Praticar</strong>
+      </div>
+
+      <header className="concepts-hero">
+        <div className="eyebrow"><span className="eyebrow-dot"/> GUIA CONCEITUAL · PROF. S@UER</div>
+        <h2>Entenda Antes de Praticar</h2>
+        <p>
+          Antes de digitar qualquer comando no terminal, compreender o modelo mental do Git e o ecossistema do GitHub tornará seu aprendizado dez vezes mais rápido e evitará os erros mais comuns cometidos por iniciantes.
+        </p>
+        <div className="concepts-meta-row">
+          <span className="concepts-badge"><Compass size={14}/> Fundamentos Essenciais</span>
+          <span className="concepts-badge"><Clock3 size={14}/> ~10 min de leitura</span>
+          <span className="concepts-badge"><Sparkles size={14}/> Didática Visual</span>
+        </div>
+      </header>
+
+      {/* Seção 1: Git vs GitHub */}
+      <section className="concepts-section">
+        <div className="concepts-section-head">
+          <span className="section-kicker">A GRANDE DIFERENÇA</span>
+          <h3>1. Git vs. GitHub: Não confunda mais!</h3>
+          <p>São duas tecnologias complementares, mas com naturezas e propósitos completamente diferentes.</p>
+        </div>
+
+        <div className="compare-grid">
+          <div className="compare-card">
+            <div className="compare-card-head">
+              <div className="compare-icon git-icon"><GitBranch size={24}/></div>
+              <div>
+                <strong>Git</strong>
+                <span>O Motor Local de Versionamento</span>
+              </div>
+            </div>
+            <ul className="compare-list">
+              <li><CheckCircle2 size={16}/> <strong>O que é:</strong> Um software de controle de versões distribuído de código aberto, criado por Linus Torvalds em 2005.</li>
+              <li><CheckCircle2 size={16}/> <strong>Onde executa:</strong> Localmente no seu computador, via terminal (Git Bash, Prompt, PowerShell) ou extensões de editores.</li>
+              <li><CheckCircle2 size={16}/> <strong>Independência:</strong> Funciona 100% offline. Você não precisa de conexão com a internet para criar commits, branches ou inspecionar histórico.</li>
+              <li><CheckCircle2 size={16}/> <strong>Responsabilidade:</strong> Gravar o histórico de alterações arquivo a arquivo, permitindo voltar no tempo a qualquer momento.</li>
+            </ul>
+          </div>
+
+          <div className="compare-card">
+            <div className="compare-card-head">
+              <div className="compare-icon github-icon"><Github size={24}/></div>
+              <div>
+                <strong>GitHub</strong>
+                <span>A Plataforma de Colaboração em Nuvem</span>
+              </div>
+            </div>
+            <ul className="compare-list">
+              <li><CheckCircle2 size={16}/> <strong>O que é:</strong> Um serviço web na nuvem (da Microsoft) que hospeda repositórios Git remotos e ferramentas de colaboração.</li>
+              <li><CheckCircle2 size={16}/> <strong>Onde executa:</strong> Nos servidores da nuvem, acessado pelo navegador ou ferramentas gráficas.</li>
+              <li><CheckCircle2 size={16}/> <strong>Conexão:</strong> Exige internet para sincronizar seu trabalho local com a equipe através de envio (push) e recebimento (pull).</li>
+              <li><CheckCircle2 size={16}/> <strong>Responsabilidade:</strong> Trabalho em equipe, revisão de código (Pull Requests), automações (CI/CD), rastreamento de problemas (Issues) e portfólio.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="analogy-banner">
+          <strong>💡 Analogia Clássica:</strong> Pense no <strong>Git</strong> como o motor a combustão do seu carro (a ferramenta que faz o veículo rodar de verdade). O <strong>GitHub</strong> é a rodovia conectada, o posto de recarga e a garagem coletiva onde vários motoristas se encontram para viajar juntos.
+        </div>
+      </section>
+
+      {/* Seção 2: O Funcionamento Interno - O Ciclo dos 3 Estados */}
+      <section className="concepts-section">
+        <div className="concepts-section-head">
+          <span className="section-kicker">ARQUITETURA INTERNA</span>
+          <h3>2. Como o Git funciona por dentro: O Ciclo das 3 Áreas Locais</h3>
+          <p>O maior segredo para dominar o Git é entender o caminho que um arquivo percorre antes de se tornar histórico definitivo.</p>
+        </div>
+
+        <div className="workflow-diagram">
+          <div className="stage-card">
+            <span className="stage-num">01</span>
+            <h4>Working Directory</h4>
+            <p>Seus arquivos reais no disco, sendo editados no VS Code. Aqui as alterações ainda são voláteis e não estão registradas.</p>
+            <div className="stage-command">Edição no VS Code</div>
+          </div>
+
+          <div className="stage-card">
+            <span className="stage-num">02</span>
+            <h4>Staging Area (Index)</h4>
+            <p>A "bancada de preparação". Você seleciona cirurgicamente quais arquivos alterados farão parte do próximo registro.</p>
+            <div className="stage-command">git add &lt;arquivo&gt;</div>
+          </div>
+
+          <div className="stage-card">
+            <span className="stage-num">03</span>
+            <h4>Local Repository (.git)</h4>
+            <p>O cofre permanente no seu computador. Quando você comita, o Git tira uma "foto" definitiva e grava com hash criptográfico.</p>
+            <div className="stage-command">git commit -m "..."</div>
+          </div>
+
+          <div className="stage-card">
+            <span className="stage-num">04</span>
+            <h4>Remote Repository</h4>
+            <p>O repositório na nuvem no GitHub. Onde seu histórico é publicado para a equipe e mantido em backup seguro.</p>
+            <div className="stage-command">git push / git pull</div>
+          </div>
+        </div>
+
+        <div className="step-tip-box">
+          <Lightbulb size={18}/>
+          <div>
+            <strong>Por que a Staging Area existe?</strong>
+            <span>Imagine que você alterou 5 arquivos: 3 corrigem um formulário e 2 mudam as cores do rodapé. A Staging Area permite adicionar com git add apenas os 3 do formulário e fazer um commit focado, deixando os outros 2 para outro commit separado. Isso mantém o histórico limpo e organizado!</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Seção 3: Características Fundamentais do Git */}
+      <section className="concepts-section">
+        <div className="concepts-section-head">
+          <span className="section-kicker">CARACTERÍSTICAS TÉCNICAS</span>
+          <h3>3. Por que o Git domina o mundo do desenvolvimento?</h3>
+          <p>Quatro pilares técnicos que tornam o Git a ferramenta padrão em 99% das empresas de tecnologia do planeta.</p>
+        </div>
+
+        <div className="features-grid">
+          <div className="feature-item">
+            <div className="feature-item-icon"><Workflow size={22}/></div>
+            <div className="feature-item-text">
+              <h4>1. Arquitetura 100% Distribuída</h4>
+              <p>Ao contrário de ferramentas antigas (como SVN), no Git todo desenvolvedor possui uma cópia local completa de todo o histórico. Se o servidor cair, qualquer computador tem o backup integral do projeto.</p>
+            </div>
+          </div>
+
+          <div className="feature-item">
+            <div className="feature-item-icon"><Layers size={22}/></div>
+            <div className="feature-item-text">
+              <h4>2. Snapshots no Tempo (Fotos Reais)</h4>
+              <p>O Git não armazena apenas "diferenças de linhas" perdidas; ele enxerga o projeto como uma sucessão de fotografias completas no tempo, garantindo integridade e restauração instantânea de qualquer versão.</p>
+            </div>
+          </div>
+
+          <div className="feature-item">
+            <div className="feature-item-icon"><ShieldCheck size={22}/></div>
+            <div className="feature-item-text">
+              <h4>3. Integridade Criptográfica (Hashes SHA)</h4>
+              <p>Cada commit recebe uma impressão digital matemática única (como a1b2c3d...). É matematicamente impossível alterar uma única linha de código no passado sem que o Git detecte a fraude imediatamente.</p>
+            </div>
+          </div>
+
+          <div className="feature-item">
+            <div className="feature-item-icon"><Cpu size={22}/></div>
+            <div className="feature-item-text">
+              <h4>4. Branches Ultraleves e Quase Gratuitas</h4>
+              <p>Em outros sistemas, criar uma branch significava duplicar gigabytes de arquivos. No Git, uma branch é apenas um ponteiro de 41 bytes na memória. Você pode criar, mesclar e apagar branches em milissegundos.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Seção 4: Possibilidades do GitHub no Mercado */}
+      <section className="concepts-section">
+        <div className="concepts-section-head">
+          <span className="section-kicker">O PODER DO GITHUB</span>
+          <h3>4. As possibilidades que o GitHub abre para sua carreira</h3>
+          <p>Muito mais que um repositório: o GitHub é a principal plataforma de engenharia de software colaborativa da atualidade.</p>
+        </div>
+
+        <div className="possibilities-grid">
+          <div className="possibility-card">
+            <div className="icon-pill"><Users size={20}/></div>
+            <h4>Colaboração e Code Review</h4>
+            <p>Trabalhe em equipe sem conflitos diretos. Use Pull Requests para revisar código, sugerir melhorias linha por linha e aprovar alterações com rigor profissional.</p>
+          </div>
+
+          <div className="possibility-card">
+            <div className="icon-pill"><Rocket size={20}/></div>
+            <h4>Automação com GitHub Actions (CI/CD)</h4>
+            <p>Configure pipelines automáticos: a cada commit, o GitHub pode testar seu código, verificar falhas de segurança e fazer deploy automático em produção.</p>
+          </div>
+
+          <div className="possibility-card">
+            <div className="icon-pill"><Globe size={20}/></div>
+            <h4>Comunidade Open Source & Portfólio</h4>
+            <p>Contribua com os maiores projetos do mundo (Linux, React, Python) e construa seu portfólio público visível para recrutadores e empresas globais.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Seção 5: Glossário de Sobrevivência */}
+      <section className="concepts-section">
+        <div className="concepts-section-head">
+          <span className="section-kicker">VOCABULÁRIO FUNDAMENTAL</span>
+          <h3>5. Glossário Rápido de Termos do Git/GitHub</h3>
+          <p>Os 8 termos que você mais ouvirá no dia a dia profissional:</p>
+        </div>
+
+        <div className="glossary-grid">
+          <div className="glossary-item">
+            <code>Repositório (Repo)</code>
+            <span>A pasta do projeto gerenciada pelo Git contendo todos os arquivos e o histórico oculto na pasta .git.</span>
+          </div>
+          <div className="glossary-item">
+            <code>Commit</code>
+            <span>Um ponto de salvamento permanente no histórico, acompanhado de autor, data e mensagem explicativa.</span>
+          </div>
+          <div className="glossary-item">
+            <code>Branch (Ramificação)</code>
+            <span>Uma linha paralela de desenvolvimento para criar funcionalidades sem afetar a versão principal (main).</span>
+          </div>
+          <div className="glossary-item">
+            <code>Merge (Mesclagem)</code>
+            <span>A operação de unir o histórico de uma branch secundária (dev) de volta à branch principal.</span>
+          </div>
+          <div className="glossary-item">
+            <code>Pull Request (PR)</code>
+            <span>Uma proposta formal no GitHub para revisar e mesclar as alterações de uma branch em outra.</span>
+          </div>
+          <div className="glossary-item">
+            <code>Clone</code>
+            <span>Cópia idêntica de um repositório remoto baixada para o seu computador pela primeira vez.</span>
+          </div>
+          <div className="glossary-item">
+            <code>Push (Enviar)</code>
+            <span>Envia seus commits registrados localmente para o repositório remoto na nuvem (GitHub).</span>
+          </div>
+          <div className="glossary-item">
+            <code>Pull (Puxar)</code>
+            <span>Baixa e mescla as alterações mais recentes feitas pela equipe no GitHub para o seu computador.</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Call to Action Final */}
+      <div className="concepts-cta">
+        <div>
+          <h4>Tudo pronto para a prática?</h4>
+          <p>Agora que você tem o mapa mental claro, vamos instalar o Git e dar seus primeiros passos práticos!</p>
+        </div>
+        <div className="concepts-cta-actions">
+          <button className="secondary-btn" onClick={onBackHome}>
+            <Home size={16}/> Voltar ao início
+          </button>
+          <button className="primary-btn" onClick={onStartCourse}>
+            <Play size={16} fill="currentColor"/> Iniciar Módulo 01 (Download & Instalação)
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [activeId, setActiveId] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -368,6 +624,20 @@ function App() {
               {activeId === null ? <span className="active-dot"/> : null}
             </span>
           </button>
+          <button
+            className={`module-link ${activeId === 'concepts' ? 'active' : ''}`}
+            onClick={() => selectModule('concepts')}
+            title="Entenda Antes de Praticar: Funcionamento, características e possibilidades"
+          >
+            <span className="module-icon"><Compass size={18}/></span>
+            <span className="module-text">
+              <strong>Entenda Antes de Praticar</strong>
+              <small>Fundamentos e conceitos</small>
+            </span>
+            <span className="module-state">
+              {activeId === 'concepts' ? <span className="active-dot"/> : null}
+            </span>
+          </button>
           {modules.map(module => {
             const Icon = module.icon;
             const isActive = module.id === activeId;
@@ -409,6 +679,9 @@ function App() {
                   <button className="primary-btn" onClick={() => selectModule(1)}>
                     <Play size={16} fill="currentColor"/> Começar o curso
                   </button>
+                  <button className="secondary-btn" onClick={() => selectModule('concepts')} title="Entenda o funcionamento, características e possibilidades antes de praticar">
+                    <Compass size={16}/> Entenda Antes de Praticar
+                  </button>
                   <a href={repoUrl} target="_blank" rel="noreferrer" className="text-link">
                     Ver repositório <ExternalLink size={14}/>
                   </a>
@@ -431,6 +704,8 @@ function App() {
               <div className="stat-card"><div className="stat-icon"><Users size={19}/></div><div><strong>Aprenda fazendo</strong><span>Exercícios e colaboração</span></div></div>
             </section>
           </div>
+        ) : activeId === 'concepts' ? (
+          <ConceptsPage onStartCourse={() => selectModule(1)} onBackHome={() => selectModule(null)} />
         ) : (
           <div className="lesson-view">
             <div className="breadcrumb">

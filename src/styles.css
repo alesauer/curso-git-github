@@ -1327,6 +1327,395 @@ h1 span {
   font-weight: 500;
 }
 
+/* ============================================================
+   Concepts View (Entenda Antes de Praticar)
+   ============================================================ */
+.concepts-view {
+  animation: fadeIn 0.22s ease-out;
+  padding-bottom: 30px;
+}
+
+.concepts-hero {
+  background: linear-gradient(115deg, #f8fcf5 0%, #f2faee 50%, #eaf6e5 100%);
+  border: 1px solid #dcebd4;
+  border-radius: 20px;
+  padding: 34px 38px;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+.concepts-hero h2 {
+  font: 800 clamp(26px, 3.2vw, 38px)/1.2 var(--font-heading);
+  letter-spacing: -1px;
+  margin: 12px 0 10px;
+  color: var(--ink);
+}
+
+.concepts-hero p {
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--ink-light);
+  max-width: 760px;
+  margin: 0;
+}
+
+.concepts-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.concepts-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: #fff;
+  border: 1px solid #cce5c2;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--green-dark);
+}
+
+.concepts-section {
+  margin-bottom: 38px;
+}
+
+.concepts-section-head {
+  margin-bottom: 18px;
+}
+
+.concepts-section-head h3 {
+  font: 800 21px/1.3 var(--font-heading);
+  letter-spacing: -0.5px;
+  color: var(--ink);
+  margin: 4px 0 6px;
+}
+
+.concepts-section-head p {
+  font-size: 14.5px;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* Git vs GitHub Comparative Cards */
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.compare-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all 0.2s ease;
+}
+
+.compare-card:hover {
+  border-color: #c0dfb3;
+  box-shadow: 0 6px 20px rgba(45, 93, 27, 0.08);
+}
+
+.compare-card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.compare-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+}
+
+.compare-icon.git-icon {
+  background: #fbeee8;
+  color: #e04e28;
+}
+
+.compare-icon.github-icon {
+  background: #eff3f6;
+  color: #1f2328;
+}
+
+.compare-card-head strong {
+  font: 800 19px var(--font-heading);
+  color: var(--ink);
+  display: block;
+}
+
+.compare-card-head span {
+  font-size: 12.5px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.compare-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.compare-list li {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-light);
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.compare-list li svg {
+  color: var(--green);
+  flex: 0 0 16px;
+  margin-top: 3px;
+}
+
+.analogy-banner {
+  background: #fbfdf9;
+  border: 1px solid #dcebd4;
+  border-left: 4px solid var(--green);
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink);
+}
+
+.analogy-banner strong {
+  color: var(--green-dark);
+}
+
+/* Workflow 4 Stages Diagram */
+.workflow-diagram {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+  position: relative;
+}
+
+.stage-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.stage-card:hover {
+  border-color: #cde6c1;
+  box-shadow: 0 4px 16px rgba(45, 93, 27, 0.08);
+}
+
+.stage-num {
+  font: 800 12px var(--font-heading);
+  color: var(--green-dark);
+  background: var(--green-pale);
+  padding: 3px 8px;
+  border-radius: 6px;
+  align-self: flex-start;
+}
+
+.stage-card h4 {
+  font: 700 15px/1.3 var(--font-heading);
+  color: var(--ink);
+  margin: 0;
+}
+
+.stage-card p {
+  font-size: 13px;
+  color: var(--ink-light);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.stage-command {
+  margin-top: auto;
+  font: 600 12px var(--font-code);
+  background: #192019;
+  color: #79dd55;
+  padding: 6px 10px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Features Grid */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.feature-item {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  gap: 15px;
+  transition: all 0.18s ease;
+}
+
+.feature-item:hover {
+  border-color: #c9e3bc;
+  box-shadow: 0 4px 14px rgba(45, 93, 27, 0.06);
+}
+
+.feature-item-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--green-pale);
+  color: var(--green-dark);
+  display: grid;
+  place-items: center;
+  flex: 0 0 42px;
+}
+
+.feature-item-text h4 {
+  font: 700 15.5px/1.3 var(--font-heading);
+  color: var(--ink);
+  margin: 0 0 6px;
+}
+
+.feature-item-text p {
+  font-size: 13.5px;
+  color: var(--ink-light);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Possibilities Grid */
+.possibilities-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.possibility-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.18s ease;
+}
+
+.possibility-card:hover {
+  border-color: #c0dfb3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(45, 93, 27, 0.08);
+}
+
+.possibility-card .icon-pill {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #f0f7ec;
+  color: var(--green-dark);
+  display: grid;
+  place-items: center;
+}
+
+.possibility-card h4 {
+  font: 700 15px/1.3 var(--font-heading);
+  color: var(--ink);
+  margin: 2px 0 0;
+}
+
+.possibility-card p {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-light);
+  margin: 0;
+}
+
+/* Glossary Chips Table */
+.glossary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.glossary-item {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.glossary-item code {
+  font: 700 13px var(--font-code);
+  color: var(--green-dark);
+  background: var(--green-pale);
+  padding: 2px 7px;
+  border-radius: 5px;
+  align-self: flex-start;
+}
+
+.glossary-item span {
+  font-size: 13px;
+  color: var(--ink-light);
+  line-height: 1.5;
+}
+
+/* Concepts CTA Banner */
+.concepts-cta {
+  background: linear-gradient(112deg, #f8fcf5 0%, #f1faed 100%);
+  border: 1px solid #d2e8c7;
+  border-radius: 18px;
+  padding: 28px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 36px;
+}
+
+.concepts-cta h4 {
+  font: 800 20px/1.3 var(--font-heading);
+  color: var(--ink);
+  margin: 0 0 6px;
+}
+
+.concepts-cta p {
+  font-size: 14.5px;
+  color: var(--ink-light);
+  margin: 0;
+}
+
+.concepts-cta-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 /* Responsive Breakpoints */
 @media (min-width: 1500px) {
   .main-content {
@@ -1418,9 +1807,33 @@ h1 span {
   .expand-floating {
     display: none;
   }
+  .compare-grid {
+    grid-template-columns: 1fr;
+  }
+  .workflow-diagram {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .possibilities-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 620px) {
+  .workflow-diagram {
+    grid-template-columns: 1fr;
+  }
+  .possibilities-grid {
+    grid-template-columns: 1fr;
+  }
+  .concepts-hero {
+    padding: 24px 20px;
+  }
+  .concepts-cta {
+    padding: 22px 18px;
+  }
   .topbar {
     height: 68px;
     padding: 0 16px;
