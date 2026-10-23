@@ -4,7 +4,7 @@ import {
   BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, ChevronsRight,
   CircleHelp, Clipboard, Clock3, Code2, Command, ExternalLink, FileCode2,
   GitBranch, GitCommitHorizontal, GitFork, GitPullRequest, Github, GraduationCap,
-  Menu, PanelLeftClose, PanelLeftOpen, Play, Search, Terminal, Users, X
+  Home, Menu, PanelLeftClose, PanelLeftOpen, Play, Search, Terminal, Users, X
 } from 'lucide-react'
 import './styles.css'
 
@@ -124,22 +124,32 @@ function CodeSnippet({ code, lang = 'bash' }) {
 }
 
 function App() {
-  const [activeId, setActiveId] = useState(1)
+  const [activeId, setActiveId] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [completed, setCompleted] = useState({})
   const [checked, setChecked] = useState({})
   const [mobileMenu, setMobileMenu] = useState(false)
-  const activeModule = modules.find(m => m.id === activeId)
+  const activeModule = activeId ? modules.find(m => m.id === activeId) : null
   const completedCount = modules.filter(m => completed[m.id]).length
   const progress = Math.round((completedCount / modules.length) * 100)
   const selectModule = (id) => { setActiveId(id); setMobileMenu(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }
   const toggleCheck = (moduleId, itemIndex) => setChecked(prev => ({ ...prev, [`${moduleId}-${itemIndex}`]: !prev[`${moduleId}-${itemIndex}`] }))
-  const markComplete = () => setCompleted(prev => ({ ...prev, [activeId]: !prev[activeId] }))
+  const markComplete = () => { if (activeId) setCompleted(prev => ({ ...prev, [activeId]: !prev[activeId] })) }
 
   return <div className={`app-shell ${sidebarOpen ? '' : 'sidebar-collapsed'}`}>
     <header className="topbar">
-      <div className="brand"><div className="brand-mark"><GitBranch size={21}/></div><div className="brand-text"><strong>Curso Git / GitHub</strong><span>do Prof. S@uer</span></div></div>
-      <div className="top-actions"><a className="repo-link" href={repoUrl} target="_blank" rel="noreferrer"><Github size={17}/> Repositório do curso <ExternalLink size={13}/></a><button className="mobile-menu-btn" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Abrir navegação">{mobileMenu ? <X/> : <Menu/>}</button></div>
+      <div className="brand" onClick={() => selectModule(null)} role="button" tabIndex={0} title="Voltar ao início">
+        <div className="brand-mark"><GitBranch size={21}/></div>
+        <div className="brand-text"><strong>Curso Git / GitHub</strong><span>do Prof. S@uer</span></div>
+      </div>
+      <div className="top-actions">
+        <a className="repo-link" href={repoUrl} target="_blank" rel="noreferrer">
+          <Github size={17}/> Repositório do curso <ExternalLink size={13}/>
+        </a>
+        <button className="mobile-menu-btn" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Abrir navegação">
+          {mobileMenu ? <X/> : <Menu/>}
+        </button>
+      </div>
     </header>
 
     <div className="layout">
@@ -156,6 +166,20 @@ function App() {
           <span className="progress-caption">{completedCount} de {modules.length} módulos concluídos</span>
         </div>
         <nav className="module-nav">
+          <button
+            className={`module-link ${activeId === null ? 'active' : ''}`}
+            onClick={() => selectModule(null)}
+            title="Início do curso"
+          >
+            <span className="module-icon"><Home size={18}/></span>
+            <span className="module-text">
+              <strong>Início · Apresentação</strong>
+              <small>Visão geral</small>
+            </span>
+            <span className="module-state">
+              {activeId === null ? <span className="active-dot"/> : null}
+            </span>
+          </button>
           {modules.map(module => {
             const Icon = module.icon;
             const isActive = module.id === activeId;
@@ -186,32 +210,163 @@ function App() {
       {mobileMenu && <button className="mobile-backdrop" aria-label="Fechar menu" onClick={() => setMobileMenu(false)}/>}
 
       <main className="main-content">
-        <div className="breadcrumb"><span>Curso</span><ChevronRight size={14}/><span>{`Módulo ${activeId}`}</span><ChevronRight size={14}/><strong>{activeModule.title}</strong></div>
-        <section className="welcome-card">
-          <div className="welcome-copy"><div className="eyebrow"><span className="eyebrow-dot"/> TRILHA PRÁTICA DE DESENVOLVIMENTO</div><h1>Domine o Git.<br/><span>Colabore com confiança.</span></h1><p>Aprenda a controlar versões, organizar seu trabalho e colaborar em projetos reais usando Git e GitHub.</p><div className="welcome-actions"><button className="primary-btn" onClick={() => selectModule(1)}><Play size={16} fill="currentColor"/> Começar o curso</button><a href={repoUrl} target="_blank" rel="noreferrer" className="text-link">Ver repositório <ExternalLink size={14}/></a></div></div>
-          <div className="welcome-illustration" aria-hidden="true"><div className="orbit orbit-one"/><div className="orbit orbit-two"/><div className="git-tile"><GitBranch size={54}/></div><div className="float-card float-card-top"><GitCommitHorizontal size={17}/><span>commit</span><CheckCircle2 size={15}/></div><div className="float-card float-card-bottom"><GitPullRequest size={17}/><span>pull request</span></div><div className="green-spark spark-one"/><div className="green-spark spark-two"/></div>
-        </section>
+        {activeId === null ? (
+          <div className="home-view">
+            <section className="welcome-card">
+              <div className="welcome-copy">
+                <div className="eyebrow"><span className="eyebrow-dot"/> TRILHA PRÁTICA DE DESENVOLVIMENTO</div>
+                <h1>Domine o Git.<br/><span>Colabore com confiança.</span></h1>
+                <p>Aprenda a controlar versões, organizar seu trabalho e colaborar em projetos reais usando Git e GitHub.</p>
+                <div className="welcome-actions">
+                  <button className="primary-btn" onClick={() => selectModule(1)}>
+                    <Play size={16} fill="currentColor"/> Começar o curso
+                  </button>
+                  <a href={repoUrl} target="_blank" rel="noreferrer" className="text-link">
+                    Ver repositório <ExternalLink size={14}/>
+                  </a>
+                </div>
+              </div>
+              <div className="welcome-illustration" aria-hidden="true">
+                <div className="orbit orbit-one"/>
+                <div className="orbit orbit-two"/>
+                <div className="git-tile"><GitBranch size={54}/></div>
+                <div className="float-card float-card-top"><GitCommitHorizontal size={17}/><span>commit</span><CheckCircle2 size={15}/></div>
+                <div className="float-card float-card-bottom"><GitPullRequest size={17}/><span>pull request</span></div>
+                <div className="green-spark spark-one"/>
+                <div className="green-spark spark-two"/>
+              </div>
+            </section>
 
-        <section className="stats-row" aria-label="Informações do curso">
-          <div className="stat-card"><div className="stat-icon"><BookOpen size={19}/></div><div><strong>7 módulos</strong><span>Do básico ao avançado</span></div></div>
-          <div className="stat-card"><div className="stat-icon"><Clock3 size={19}/></div><div><strong>~3 horas</strong><span>Conteúdo prático</span></div></div>
-          <div className="stat-card"><div className="stat-icon"><Users size={19}/></div><div><strong>Aprenda fazendo</strong><span>Exercícios e colaboração</span></div></div>
-        </section>
+            <section className="stats-row" aria-label="Informações do curso">
+              <div className="stat-card"><div className="stat-icon"><BookOpen size={19}/></div><div><strong>7 módulos</strong><span>Do básico ao avançado</span></div></div>
+              <div className="stat-card"><div className="stat-icon"><Clock3 size={19}/></div><div><strong>~3 horas</strong><span>Conteúdo prático</span></div></div>
+              <div className="stat-card"><div className="stat-icon"><Users size={19}/></div><div><strong>Aprenda fazendo</strong><span>Exercícios e colaboração</span></div></div>
+            </section>
+          </div>
+        ) : (
+          <div className="lesson-view">
+            <div className="breadcrumb">
+              <button className="breadcrumb-btn" onClick={() => selectModule(null)}>
+                <Home size={13}/> Início
+              </button>
+              <ChevronRight size={14}/>
+              <span>{`Módulo ${activeId}`}</span>
+              <ChevronRight size={14}/>
+              <strong>{activeModule.title}</strong>
+            </div>
 
-        <section className="lesson-heading"><div><div className="section-kicker">SEU CONTEÚDO</div><h2>{activeModule.title}</h2><p>{activeModule.intro}</p></div><span className="duration"><Clock3 size={14}/>{activeModule.duration}</span></section>
-        <div className="objective-card"><div className="objective-icon"><GraduationCap size={20}/></div><div><strong>Objetivo desta etapa</strong><p>{activeModule.objective}</p></div></div>
+            <section className="lesson-heading">
+              <div>
+                <div className="section-kicker">SEU CONTEÚDO</div>
+                <h2>{activeModule.title}</h2>
+                <p>{activeModule.intro}</p>
+              </div>
+              <span className="duration"><Clock3 size={14}/>{activeModule.duration}</span>
+            </section>
 
-        <section className="steps-section"><div className="section-title-row"><h3>Passo a passo</h3><span>{activeModule.steps.length} etapas</span></div><div className="steps-list">{activeModule.steps.map((step, index) => <article className="step-card" key={`${activeId}-${step.title}`}><div className="step-number">{String(index + 1).padStart(2, '0')}</div><div className="step-body"><h4>{step.title}</h4><p>{step.text}</p><CodeSnippet code={step.code} lang={step.lang}/></div></article>)}</div></section>
+            <div className="objective-card">
+              <div className="objective-icon"><GraduationCap size={20}/></div>
+              <div>
+                <strong>Objetivo desta etapa</strong>
+                <p>{activeModule.objective}</p>
+              </div>
+            </div>
 
-        <section className="exercise-card"><div className="exercise-header"><div className="exercise-icon"><FileCode2 size={19}/></div><div><span className="section-kicker">MÃO NA MASSA</span><h3>Exercício prático</h3></div></div><p>{activeModule.exercise}</p><div className="exercise-repo"><Github size={16}/><span>Repositório utilizado nos testes</span><a href={repoUrl} target="_blank" rel="noreferrer">alesauer/tutorial-git <ExternalLink size={13}/></a></div></section>
+            <section className="steps-section">
+              <div className="section-title-row">
+                <h3>Passo a passo</h3>
+                <span>{activeModule.steps.length} etapas</span>
+              </div>
+              <div className="steps-list">
+                {activeModule.steps.map((step, index) => (
+                  <article className="step-card" key={`${activeId}-${step.title}`}>
+                    <div className="step-number">{String(index + 1).padStart(2, '0')}</div>
+                    <div className="step-body">
+                      <h4>{step.title}</h4>
+                      <p>{step.text}</p>
+                      <CodeSnippet code={step.code} lang={step.lang}/>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
 
-        <section className="checklist-card"><div className="section-title-row"><div><h3>Checklist de aprendizagem</h3><p>Marque os itens que você já concluiu nesta etapa.</p></div><span className="check-count">{activeModule.check.filter((_, i) => checked[`${activeId}-${i}`]).length}/{activeModule.check.length}</span></div><div className="checklist">{activeModule.check.map((item, index) => <label className={`check-item ${checked[`${activeId}-${index}`] ? 'checked' : ''}`} key={item}><input type="checkbox" checked={!!checked[`${activeId}-${index}`]} onChange={() => toggleCheck(activeId, index)}/><span className="custom-check"><Check size={13}/></span><span>{item}</span></label>)}</div></section>
+            <section className="exercise-card">
+              <div className="exercise-header">
+                <div className="exercise-icon"><FileCode2 size={19}/></div>
+                <div>
+                  <span className="section-kicker">MÃO NA MASSA</span>
+                  <h3>Exercício prático</h3>
+                </div>
+              </div>
+              <p>{activeModule.exercise}</p>
+              <div className="exercise-repo">
+                <Github size={16}/>
+                <span>Repositório utilizado nos testes</span>
+                <a href={repoUrl} target="_blank" rel="noreferrer">
+                  alesauer/tutorial-git <ExternalLink size={13}/>
+                </a>
+              </div>
+            </section>
 
-        <div className="lesson-footer"><button className="secondary-btn" disabled={activeId === 1} onClick={() => selectModule(activeId - 1)}><ChevronLeft size={16}/> Módulo anterior</button><button className={`complete-btn ${completed[activeId] ? 'is-complete' : ''}`} onClick={markComplete}>{completed[activeId] ? <CheckCircle2 size={17}/> : <Check size={17}/>} {completed[activeId] ? 'Etapa concluída' : 'Marcar como concluída'}</button><button className="primary-btn next-btn" disabled={activeId === modules.length} onClick={() => selectModule(activeId + 1)}>Próximo módulo <ChevronRight size={16}/></button></div>
-        <footer className="footer"><span>Curso Git / GitHub do Prof. S@uer</span><span>Aprender · Praticar · Colaborar</span></footer>
+            <section className="checklist-card">
+              <div className="section-title-row">
+                <div>
+                  <h3>Checklist de aprendizagem</h3>
+                  <p>Marque os itens que você já concluiu nesta etapa.</p>
+                </div>
+                <span className="check-count">
+                  {activeModule.check.filter((_, i) => checked[`${activeId}-${i}`]).length}/{activeModule.check.length}
+                </span>
+              </div>
+              <div className="checklist">
+                {activeModule.check.map((item, index) => (
+                  <label className={`check-item ${checked[`${activeId}-${index}`] ? 'checked' : ''}`} key={item}>
+                    <input
+                      type="checkbox"
+                      checked={!!checked[`${activeId}-${index}`]}
+                      onChange={() => toggleCheck(activeId, index)}
+                    />
+                    <span className="custom-check"><Check size={13}/></span>
+                    <span>{item}</span>
+                  </label>
+                ))}
+              </div>
+            </section>
+
+            <div className="lesson-footer">
+              <button
+                className="secondary-btn"
+                onClick={() => activeId === 1 ? selectModule(null) : selectModule(activeId - 1)}
+              >
+                <ChevronLeft size={16}/> {activeId === 1 ? 'Início' : 'Módulo anterior'}
+              </button>
+              <button
+                className={`complete-btn ${completed[activeId] ? 'is-complete' : ''}`}
+                onClick={markComplete}
+              >
+                {completed[activeId] ? <CheckCircle2 size={17}/> : <Check size={17}/>}{' '}
+                {completed[activeId] ? 'Etapa concluída' : 'Marcar como concluída'}
+              </button>
+              <button
+                className="primary-btn next-btn"
+                disabled={activeId === modules.length}
+                onClick={() => selectModule(activeId + 1)}
+              >
+                Próximo módulo <ChevronRight size={16}/>
+              </button>
+            </div>
+          </div>
+        )}
+
+        <footer className="footer">
+          <span>Curso Git / GitHub do Prof. S@uer</span>
+          <span>Aprender · Praticar · Colaborar</span>
+        </footer>
       </main>
     </div>
   </div>
 }
 
 createRoot(document.getElementById('root')).render(<React.StrictMode><App /></React.StrictMode>)
+
