@@ -1120,8 +1120,38 @@ function MissingEvidenceModal({ isOpen, onClose, missingModules, onGoToModule })
   )
 }
 
-function CertificateModal({ isOpen, onClose, student, issueDate, emailStatus, emailMsg, onResendEmail, evidencesCount = 7 }) {
+function CertificateModal({ isOpen, onClose, student, issueDate, emailStatus, emailMsg, onResendEmail, evidencesCount = 0, onOpenMissing }) {
   if (!isOpen) return null
+
+  // Bloqueio absoluto: se tiver menos de 7 evidências, o certificado não é renderizado
+  if (evidencesCount < 7) {
+    return (
+      <div className="app-modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+        <div className="app-modal-box" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
+          <div className="app-modal-header">
+            <div>
+              <div className="section-kicker" style={{ color: '#b45309' }}>CERTIFICADO BLOQUEADO</div>
+              <h3>Evidências Incompletas ({evidencesCount} de 7)</h3>
+              <p>
+                Para emitir seu Certificado Oficial, é obrigatório anexar os prints ou links de <strong>todos os 7 módulos</strong>. Atualmente você possui apenas {evidencesCount} de 7 comprovantes registrados.
+              </p>
+            </div>
+            <button className="app-modal-close-btn" onClick={onClose} aria-label="Fechar"><X size={18} /></button>
+          </div>
+          <div className="app-modal-body" style={{ paddingBottom: 24 }}>
+            <button
+              type="button"
+              className="primary-btn complete-course-btn warning-btn"
+              onClick={() => { onClose(); if (onOpenMissing) onOpenMissing(); }}
+              style={{ width: '100%', justifyContent: 'center', padding: '12px 18px', fontSize: 14 }}
+            >
+              <AlertTriangle size={16} /> Ver e Anexar Módulos Pendentes
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const certCode = generateCertificateCode(student?.name, issueDate)
 
@@ -1268,17 +1298,36 @@ function App() {
   const checkedCount = modules.reduce((sum, m) => sum + m.check.filter((_, i) => checked[`${m.id}-${i}`]).length, 0)
   const allModulesDone = modules.length > 0 && modules.every(m => !!completed[m.id])
 
-  const missingEvidenceModules = modules.filter(m => !evidences[m.id]?.data)
-  const hasAllEvidences = missingEvidenceModules.length === 0
+  // Contagem estrita e validação de todas as 7 evidências
+  const attachedEvidencesCount = modules.filter(m => {
+    const ev = evidences[m.id]
+    if (!ev || !ev.data) return false
+    if (ev.type === 'image' && typeof ev.data === 'string' && ev.data.startsWith('data:image/')) return true
+    if (ev.type === 'link' && typeof ev.data === 'string' && (ev.data.startsWith('http://') || ev.data.startsWith('https://'))) return true
+    return false
+  }).length
 
-  // Progress: 100% when all 7 modules are completed, or proportional based on modules + checks
-  const progress = allModulesDone
+  const missingEvidenceModules = modules.filter(m => {
+    const ev = evidences[m.id]
+    if (!ev || !ev.data) return true
+    if (ev.type === 'image' && typeof ev.data === 'string' && ev.data.startsWith('data:image/')) return false
+    if (ev.type === 'link' && typeof ev.data === 'string' && (ev.data.startsWith('http://') || ev.data.startsWith('https://'))) return false
+    return true
+  })
+
+  // Bloqueio rigoroso: O aluno DEVE ter todas as 7 evidências comprovadas
+  const hasAllEvidences = modules.length === 7 && attachedEvidencesCount === 7 && missingEvidenceModules.length === 0
+  const isCourseComplete = allModulesDone && hasAllEvidences
+
+  // Progress só atinge 100% se todas as aulas E todas as 7 evidências estiverem comprovadas!
+  const progress = isCourseComplete
     ? 100
     : Math.min(
-        99,
+        95,
         Math.round(
-          ((completedCount / modules.length) * 75) +
-          (totalChecks > 0 ? (checkedCount / totalChecks) * 25 : 0)
+          ((completedCount / modules.length) * 55) +
+          ((attachedEvidencesCount / modules.length) * 35) +
+          (totalChecks > 0 ? (checkedCount / totalChecks) * 10 : 0)
         )
       )
 
@@ -1303,6 +1352,18 @@ function App() {
       saveToStorage(STORAGE_KEYS.EVIDENCES, next)
       return next
     })
+  }
+
+  const handleOpenCertificate = () => {
+    if (!student) {
+      setShowRegisterModal(true)
+      return
+    }
+    if (!hasAllEvidences || !allModulesDone) {
+      setShowMissingModal(true)
+      return
+    }
+    triggerCertificateAndEmail(student)
   }
 
   const triggerCertificateAndEmail = (studentProfile) => {
@@ -1445,9 +1506,9 @@ function App() {
     triggerCertificateAndEmail(student)
   }
 
-  // Automatic celebration and email dispatch when reaching 100% AND has all evidences
+  // Automatic celebration and email dispatch when reaching 100% AND has all 7 evidences
   useEffect(() => {
-    if (progress === 100 && student?.email && hasAllEvidences) {
+    if (isCourseComplete && student?.email) {
       const emailSentKey = `${STORAGE_KEYS.SENT_PREFIX}${student.email}`
       const alreadySent = localStorage.getItem(emailSentKey)
 
@@ -1455,7 +1516,7 @@ function App() {
         triggerCertificateAndEmail(student)
       }
     }
-  }, [progress, student, hasAllEvidences, issueDate])
+  }, [isCourseComplete, student, issueDate])
 
   const handleResendEmail = async () => {
     if (!student?.email) {
@@ -1548,15 +1609,23 @@ function App() {
             </button>
           )}
 
-          {progress === 100 && (
+          {isCourseComplete ? (
             <button
               className="top-cert-btn"
-              onClick={() => setShowCertModal(true)}
+              onClick={handleOpenCertificate}
               title="Visualizar e imprimir seu Certificado Oficial de Conclusão"
             >
               <Award size={16} /> Ver Certificado
             </button>
-          )}
+          ) : allModulesDone ? (
+            <button
+              className="top-cert-pending-btn"
+              onClick={() => setShowMissingModal(true)}
+              title={`Faltam ${missingEvidenceModules.length} evidências para liberar o certificado`}
+            >
+              <AlertTriangle size={15} /> Faltam Evidências ({attachedEvidencesCount}/7)
+            </button>
+          ) : null}
 
           <a className="repo-link" href={repoUrl} target="_blank" rel="noreferrer">
             <Github size={17}/> Repositório do curso <ExternalLink size={13}/>
@@ -1578,13 +1647,13 @@ function App() {
           <div className="progress-box">
             <div className="progress-label"><span>Seu progresso</span><strong>{progress}%</strong></div>
             <div className="progress-track"><div className="progress-fill" style={{ width: `${progress}%` }}/></div>
-            <span className="progress-caption">{completedCount} de {modules.length} módulos concluídos</span>
+            <span className="progress-caption">{completedCount} de {modules.length} módulos · {attachedEvidencesCount} de {modules.length} evidências</span>
           </div>
 
-          {progress === 100 && (
+          {isCourseComplete ? (
             <button
               className="sidebar-cert-banner"
-              onClick={() => setShowCertModal(true)}
+              onClick={handleOpenCertificate}
               title="Clique para ver ou imprimir seu Certificado Oficial"
             >
               <div className="cert-banner-icon"><Award size={20} /></div>
@@ -1593,7 +1662,19 @@ function App() {
                 <span>Ver Certificado Oficial</span>
               </div>
             </button>
-          )}
+          ) : allModulesDone ? (
+            <button
+              className="sidebar-cert-banner is-pending-evidence"
+              onClick={() => setShowMissingModal(true)}
+              title="Clique para ver e anexar as evidências pendentes"
+            >
+              <div className="cert-banner-icon warning"><AlertTriangle size={20} /></div>
+              <div>
+                <strong>Evidências Pendentes</strong>
+                <span>{attachedEvidencesCount} de 7 anexadas · Concluir</span>
+              </div>
+            </button>
+          ) : null}
 
           <nav className="module-nav">
             <button
@@ -1656,17 +1737,30 @@ function App() {
         <main className="main-content">
           {activeId === null ? (
             <div className="home-view">
-              {progress === 100 && (
-                <div className="course-completed-celebration-card" style={{ margin: '0 0 24px' }}>
-                  <div className="celebration-icon"><Award size={32} /></div>
-                  <div className="celebration-text">
-                    <h3>🎉 Parabéns! Você concluiu 100% do curso de Git &amp; GitHub!</h3>
-                    <p>Seu Certificado Oficial está emitido e autenticado. Você pode visualizá-lo, imprimi-lo ou reenviá-lo a qualquer momento.</p>
+              {allModulesDone && (
+                isCourseComplete ? (
+                  <div className="course-completed-celebration-card" style={{ margin: '0 0 24px' }}>
+                    <div className="celebration-icon"><Award size={32} /></div>
+                    <div className="celebration-text">
+                      <h3>🎉 Parabéns! Você concluiu 100% do curso com todas as 7 evidências!</h3>
+                      <p>Seu Certificado Oficial está emitido e autenticado. Você pode visualizá-lo, imprimi-lo ou reenviá-lo a qualquer momento.</p>
+                    </div>
+                    <button className="primary-btn complete-course-btn" onClick={handleOpenCertificate}>
+                      <Award size={17} /> Visualizar Meu Certificado
+                    </button>
                   </div>
-                  <button className="primary-btn complete-course-btn" onClick={() => triggerCertificateAndEmail()}>
-                    <Award size={17} /> Visualizar Meu Certificado
-                  </button>
-                </div>
+                ) : (
+                  <div className="course-completed-celebration-card is-pending-card" style={{ margin: '0 0 24px' }}>
+                    <div className="celebration-icon warning"><AlertTriangle size={32} /></div>
+                    <div className="celebration-text">
+                      <h3>⚠️ Faltam comprovações práticas para liberar o certificado ({attachedEvidencesCount} de 7 anexadas)</h3>
+                      <p>Você completou as 7 etapas, mas para emitir seu Certificado Oficial é obrigatório anexar os prints ou links dos {missingEvidenceModules.length} módulos pendentes.</p>
+                    </div>
+                    <button className="primary-btn complete-course-btn warning-btn" onClick={() => setShowMissingModal(true)}>
+                      <AlertTriangle size={17} /> Anexar Evidências Faltantes
+                    </button>
+                  </div>
+                )
               )}
               <section className="welcome-card">
                 <div className="welcome-copy">
@@ -1862,16 +1956,29 @@ function App() {
               />
 
               {allModulesDone && (
-                <div className="course-completed-celebration-card">
-                  <div className="celebration-icon"><Award size={32} /></div>
-                  <div className="celebration-text">
-                    <h3>🎉 Parabéns! Você concluiu todos os 7 módulos do curso!</h3>
-                    <p>Seu Certificado Oficial com código autenticador está disponível para visualização, impressão e envio por e-mail.</p>
+                isCourseComplete ? (
+                  <div className="course-completed-celebration-card">
+                    <div className="celebration-icon"><Award size={32} /></div>
+                    <div className="celebration-text">
+                      <h3>🎉 Parabéns! Você concluiu todos os 7 módulos e comprovou todas as evidências!</h3>
+                      <p>Seu Certificado Oficial com código autenticador está disponível para visualização, impressão e envio por e-mail.</p>
+                    </div>
+                    <button className="primary-btn complete-course-btn" onClick={handleOpenCertificate}>
+                      <Award size={17} /> Visualizar Certificado
+                    </button>
                   </div>
-                  <button className="primary-btn complete-course-btn" onClick={() => triggerCertificateAndEmail()}>
-                    <Award size={17} /> Visualizar Certificado
-                  </button>
-                </div>
+                ) : (
+                  <div className="course-completed-celebration-card is-pending-card">
+                    <div className="celebration-icon warning"><AlertTriangle size={32} /></div>
+                    <div className="celebration-text">
+                      <h3>⚠️ Faltam comprovações práticas para liberar o certificado ({attachedEvidencesCount} de 7 anexadas)</h3>
+                      <p>Você completou todos os módulos, mas é obrigatório anexar os prints ou links dos {missingEvidenceModules.length} módulos pendentes para emitir o certificado.</p>
+                    </div>
+                    <button className="primary-btn complete-course-btn warning-btn" onClick={() => setShowMissingModal(true)}>
+                      <AlertTriangle size={17} /> Ver Módulos Pendentes
+                    </button>
+                  </div>
+                )
               )}
 
               <div className="lesson-footer">
@@ -1893,7 +2000,7 @@ function App() {
                     className="primary-btn complete-course-btn"
                     onClick={handleFinishCourse}
                   >
-                    <Award size={17}/> {allModulesDone ? 'Ver Certificado' : 'Concluir Curso & Emitir Certificado'}
+                    <Award size={17}/> {isCourseComplete ? 'Ver Certificado' : 'Concluir Curso & Emitir Certificado'}
                   </button>
                 ) : (
                   <button
@@ -1940,7 +2047,8 @@ function App() {
         emailStatus={certEmailStatus}
         emailMsg={certEmailMsg}
         onResendEmail={handleResendEmail}
-        evidencesCount={modules.filter(m => !!evidences[m.id]?.data).length}
+        evidencesCount={attachedEvidencesCount}
+        onOpenMissing={() => setShowMissingModal(true)}
       />
     </div>
   )

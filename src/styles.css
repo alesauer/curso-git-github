@@ -2017,6 +2017,27 @@ h1 span {
   box-shadow: 0 4px 12px rgba(45, 93, 27, 0.35);
 }
 
+.top-cert-pending-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 10px;
+  padding: 7px 12px;
+  font: 700 13px var(--font-body);
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.top-cert-pending-btn:hover {
+  background: #fef3c7;
+  border-color: #fcd34d;
+  color: #78350f;
+  transform: translateY(-1px);
+}
+
 @keyframes pulseHighlight {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.03); }
@@ -2042,6 +2063,20 @@ h1 span {
   transform: translateY(-1px);
 }
 
+.sidebar-cert-banner.is-pending-evidence {
+  background: linear-gradient(135deg, #fffdf5 0%, #fef8e7 100%);
+  border-color: #fde29f;
+}
+
+.sidebar-cert-banner.is-pending-evidence:hover {
+  background: #fef3d6;
+  border-color: #fcd34d;
+}
+
+.sidebar-cert-banner.is-pending-evidence strong {
+  color: #92400e;
+}
+
 .cert-banner-icon {
   width: 36px;
   height: 36px;
@@ -2051,6 +2086,10 @@ h1 span {
   display: grid;
   place-items: center;
   flex: 0 0 36px;
+}
+
+.cert-banner-icon.warning {
+  background: #f59e0b;
 }
 
 .sidebar-cert-banner strong {
@@ -2107,6 +2146,29 @@ h1 span {
   color: var(--ink-light);
   margin: 0;
   line-height: 1.5;
+}
+
+.course-completed-celebration-card.is-pending-card {
+  background: linear-gradient(135deg, #fffdf2 0%, #fef7db 100%);
+  border-color: #ecd58b;
+  box-shadow: 0 8px 24px rgba(180, 130, 20, 0.12);
+}
+
+.course-completed-celebration-card.is-pending-card .celebration-icon.warning {
+  background: #f59e0b;
+}
+
+.course-completed-celebration-card.is-pending-card h3 {
+  color: #92400e;
+}
+
+.complete-course-btn.warning-btn {
+  background: linear-gradient(135deg, #b45309 0%, #d97706 100%) !important;
+  box-shadow: 0 4px 14px rgba(180, 83, 9, 0.35) !important;
+}
+
+.complete-course-btn.warning-btn:hover {
+  box-shadow: 0 6px 18px rgba(180, 83, 9, 0.45) !important;
 }
 
 .complete-course-btn {
