@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import {
-  AlertTriangle, ArrowRight, BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, ChevronsRight,
+  AlertTriangle, BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, ChevronsRight,
   CircleHelp, Clipboard, Clock3, Code2, Command, Download, ExternalLink, FileCode2,
   GitBranch, GitCommitHorizontal, GitFork, GitPullRequest, Github, GraduationCap,
-  Home, Lightbulb, Menu, PanelLeftClose, PanelLeftOpen, Play, Search, Settings, Sparkles, Terminal, Users, X
+  Home, Lightbulb, Menu, PanelLeftClose, PanelLeftOpen, Play, Search, Settings, Terminal, Users, X
 } from 'lucide-react'
-import cardImg from './assets/card.png'
 import './styles.css'
 
 const repoUrl = 'https://github.com/alesauer/tutorial-git'
@@ -318,15 +317,6 @@ function App() {
   const [completed, setCompleted] = useState({})
   const [checked, setChecked] = useState({})
   const [mobileMenu, setMobileMenu] = useState(false)
-  const [zoomModal, setZoomModal] = useState(false)
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') setZoomModal(false)
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
   const activeModule = activeId ? modules.find(m => m.id === activeId) : null
   const completedCount = modules.filter(m => completed[m.id]).length
   const progress = Math.round((completedCount / modules.length) * 100)
@@ -410,103 +400,35 @@ function App() {
       <main className="main-content">
         {activeId === null ? (
           <div className="home-view">
-            <section className="home-header">
-              <div className="home-header-copy">
-                <div className="eyebrow"><span className="eyebrow-dot"/> TRILHA OFICIAL DO PROF. S@UER</div>
-                <h1>Curso Git / GitHub <span>do Prof. S@uer</span></h1>
-                <p>Do básico ao trabalho em equipe, com prática e aplicações reais. Acompanhe a trilha oficial com os 7 módulos práticos e o projeto final colaborativo.</p>
-              </div>
-              <div className="home-header-actions">
-                <button className="primary-btn hero-start-btn" onClick={() => selectModule(1)}>
-                  <Play size={17} fill="currentColor"/> Começar o curso
-                </button>
-                <button className="zoom-trigger-btn" onClick={() => setZoomModal(true)} title="Ampliar infográfico em alta resolução">
-                  <Search size={15}/> Ampliar imagem
-                </button>
-                <a href={repoUrl} target="_blank" rel="noreferrer" className="secondary-btn">
-                  <Github size={16}/> Repositório <ExternalLink size={13}/>
-                </a>
-              </div>
-            </section>
-
-            <section className="roadmap-showcase" aria-label="Infográfico oficial do curso">
-              <div className="roadmap-toolbar">
-                <div className="roadmap-badge">
-                  <Sparkles size={14}/>
-                  <span>Infográfico Oficial da Trilha</span>
-                </div>
-                <div className="roadmap-toolbar-hint">
-                  <span>💡 Clique na imagem para iniciar o Módulo 01</span>
+            <section className="welcome-card">
+              <div className="welcome-copy">
+                <div className="eyebrow"><span className="eyebrow-dot"/> TRILHA PRÁTICA DE DESENVOLVIMENTO</div>
+                <h1>Domine o Git.<br/><span>Colabore com confiança.</span></h1>
+                <p>Aprenda a controlar versões, organizar seu trabalho e colaborar em projetos reais usando Git e GitHub.</p>
+                <div className="welcome-actions">
+                  <button className="primary-btn" onClick={() => selectModule(1)}>
+                    <Play size={16} fill="currentColor"/> Começar o curso
+                  </button>
+                  <a href={repoUrl} target="_blank" rel="noreferrer" className="text-link">
+                    Ver repositório <ExternalLink size={14}/>
+                  </a>
                 </div>
               </div>
-              <div
-                className="roadmap-frame"
-                onClick={() => selectModule(1)}
-                role="button"
-                tabIndex={0}
-                title="Clique na imagem para começar o curso pelo Módulo 01"
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') selectModule(1) }}
-              >
-                <img
-                  src={cardImg}
-                  alt="Infográfico oficial do Curso Git / GitHub do Prof. Sauer com os 7 módulos e Projeto Final Colaborativo"
-                  className="roadmap-image"
-                />
-                <div className="roadmap-overlay-hint">
-                  <Play size={14} fill="currentColor"/>
-                  <span>Clique para começar o curso</span>
-                </div>
+              <div className="welcome-illustration" aria-hidden="true">
+                <div className="orbit orbit-one"/>
+                <div className="orbit orbit-two"/>
+                <div className="git-tile"><GitBranch size={54}/></div>
+                <div className="float-card float-card-top"><GitCommitHorizontal size={17}/><span>commit</span><CheckCircle2 size={15}/></div>
+                <div className="float-card float-card-bottom"><GitPullRequest size={17}/><span>pull request</span></div>
+                <div className="green-spark spark-one"/>
+                <div className="green-spark spark-two"/>
               </div>
             </section>
 
             <section className="stats-row" aria-label="Informações do curso">
-              <div className="stat-card">
-                <div className="stat-icon"><BookOpen size={19}/></div>
-                <div><strong>7 módulos práticos</strong><span>Do básico ao avançado</span></div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon"><Clock3 size={19}/></div>
-                <div><strong>~3 horas estimadas</strong><span>Comandos, dicas e exercícios</span></div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-icon"><Users size={19}/></div>
-                <div><strong>Desenvolvimento em equipe</strong><span>Pull Requests e Projeto Final</span></div>
-              </div>
-            </section>
-
-            <section className="home-modules-section">
-              <div className="section-title-row">
-                <div>
-                  <span className="section-kicker">ACESSO RÁPIDO AOS MÓDULOS</span>
-                  <h3>Escolha uma etapa para começar</h3>
-                </div>
-                <span>7 módulos</span>
-              </div>
-              <div className="home-modules-grid">
-                {modules.map((m) => {
-                  return (
-                    <div
-                      key={m.id}
-                      className="home-module-card"
-                      onClick={() => selectModule(m.id)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') selectModule(m.id) }}
-                    >
-                      <div className="home-module-card-top">
-                        <span className="home-module-badge">Módulo {String(m.id).padStart(2, '0')}</span>
-                        <span className="home-module-duration"><Clock3 size={12}/>{m.duration}</span>
-                      </div>
-                      <h4>{m.title}</h4>
-                      <p>{m.short}</p>
-                      <div className="home-module-cta">
-                        <span>Acessar módulo</span>
-                        <ArrowRight size={13}/>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
+              <div className="stat-card"><div className="stat-icon"><BookOpen size={19}/></div><div><strong>7 módulos</strong><span>Do básico ao avançado</span></div></div>
+              <div className="stat-card"><div className="stat-icon"><Clock3 size={19}/></div><div><strong>~3 horas</strong><span>Conteúdo prático</span></div></div>
+              <div className="stat-card"><div className="stat-icon"><Users size={19}/></div><div><strong>Aprenda fazendo</strong><span>Exercícios e colaboração</span></div></div>
             </section>
           </div>
         ) : (
@@ -664,35 +586,6 @@ function App() {
         </footer>
       </main>
     </div>
-
-    {zoomModal && (
-      <div className="lightbox-modal" onClick={() => setZoomModal(false)} role="dialog" aria-modal="true">
-        <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
-          <div className="lightbox-topbar">
-            <strong>Infográfico Oficial do Curso · Prof. S@uer</strong>
-            <div className="lightbox-actions">
-              <button
-                className="primary-btn"
-                style={{ padding: '6px 14px', fontSize: '13px' }}
-                onClick={() => { setZoomModal(false); selectModule(1); }}
-              >
-                <Play size={13} fill="currentColor"/> Começar pelo Módulo 01
-              </button>
-              <button className="lightbox-close-btn" onClick={() => setZoomModal(false)} aria-label="Fechar">
-                <X size={18}/>
-              </button>
-            </div>
-          </div>
-          <div className="lightbox-img-box">
-            <img
-              src={cardImg}
-              alt="Infográfico oficial do curso em alta resolução"
-              className="lightbox-img"
-            />
-          </div>
-        </div>
-      </div>
-    )}
   </div>
 }
 
