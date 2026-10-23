@@ -202,17 +202,58 @@ const modules = [
     ]
   },
   {
-    id: 5, title: 'Comandos intermediários e avançados', short: 'Histórico e recuperação', icon: GitFork, duration: '45 min',
-    intro: 'Conheça comandos para integrar mudanças, guardar trabalho temporário e recuperar alterações com cuidado.',
-    objective: 'Ao final, você saberá escolher uma estratégia segura para situações comuns de versionamento.',
+    id: 5,
+    title: 'Comandos intermediários e avançados',
+    short: 'Histórico e recuperação',
+    icon: GitFork,
+    duration: '50 min',
+    intro: 'Aprofunde seu domínio no Git com ferramentas essenciais para o dia a dia profissional: integração com merge, resolução de conflitos, isolamento temporário com stash, reversão segura e versionamento semântico com tags.',
+    objective: 'Ao final, você saberá resolver conflitos de merge, guardar trabalho temporário sem comitar, desfazer alterações com segurança no histórico compartilhado e marcar versões de release no GitHub.',
     steps: [
-      { title: 'Integrar uma branch', text: 'Mude para a branch que receberá as alterações e faça o merge da branch de origem.', code: 'git switch main\ngit merge nome-da-branch', lang: 'bash' },
-      { title: 'Guardar alterações temporariamente', text: 'Stash é útil quando você precisa trocar de contexto sem criar um commit ainda.', code: 'git stash\ngit stash list\ngit stash pop', lang: 'bash' },
-      { title: 'Desfazer com segurança', text: 'Restore pode descartar alterações locais. Revert cria um commit que desfaz outro commit sem reescrever o histórico compartilhado.', code: 'git restore --staged arquivo.txt\ngit revert <hash-do-commit>', lang: 'bash' },
-      { title: 'Consultar e marcar versões', text: 'Use log para investigar o histórico e tag para marcar uma versão importante.', code: 'git log --oneline --graph\ngit tag v1.0.0', lang: 'bash' }
+      {
+        title: 'Integração de branches (git merge) e resolução de conflitos',
+        text: 'O merge combina o histórico de duas branches. Para trazer as alterações da branch dev para a branch principal, você deve primeiro se posicionar na main e executar o comando de integração:\n\nO que acontece se houver conflito?\nSe a mesma linha do mesmo arquivo tiver sido modificada na main e na dev, o Git pausará o merge e inserirá marcadores no arquivo:\n<<<<<<< HEAD (sua versão atual na main)\n=======\n>>>>>>> dev (a versão vinda da branch dev)\n\nComo resolver: Abra o arquivo, apague os marcadores, decida qual código manter, salve o arquivo, execute git add . e finalize com git commit.',
+        tip: 'No VS Code, quando ocorre um conflito de merge, o editor exibe botões automáticos logo acima do código ("Accept Current Change", "Accept Incoming Change", "Accept Both"). Isso torna a resolução muito mais intuitiva!',
+        code: '# 1. Alterna para a branch de destino (main)\ngit switch main\n\n# 2. Mescla o histórico da branch dev\ngit merge dev\n\n# 3. Caso haja conflito, após editar e salvar os arquivos:\ngit add .\ngit commit -m "merge: resolve conflitos entre main e dev"',
+        lang: 'bash'
+      },
+      {
+        title: 'Guardar trabalho temporário com git stash (Gaveta rápida)',
+        text: 'Imagine que você começou a programar na branch dev, seus arquivos estão incompletos e quebram a aplicação, mas você precisa urgentemente mudar para a main para verificar outro problema.\n\nVocê não pode comitar código quebrado! A solução é o git stash: ele funciona como uma "gaveta" que guarda suas modificações não comitadas e deixa a pasta de trabalho 100% limpa.',
+        tip: 'O stash é ideal para trocas rápidas de contexto no mesmo dia. Evite acumular muitos stashes antigos por semanas, pois você pode se esquecer do que estava guardado.',
+        code: '# 1. Guarda as alterações não comitadas na gaveta do stash\ngit stash -u\n\n# 2. Lista todos os itens guardados no stash\ngit stash list\n\n# 3. Alterne entre branches livremente\ngit switch main\n\n# 4. Ao voltar para a dev, recupere seu trabalho e limpe a gaveta\ngit switch dev\ngit stash pop',
+        lang: 'bash'
+      },
+      {
+        title: 'Desfazer alterações com segurança (restore vs revert)',
+        text: 'Saber desfazer alterações sem perder trabalho é uma das habilidades mais importantes do Git:\n\n1. git restore: Descarta alterações locais em arquivos que ainda NÃO foram comitados.\n2. git restore --staged: Remove arquivos da área de preparação (staging) sem apagar seu código.\n3. git revert: É a forma recomendada e segura de desfazer um commit já enviado ao GitHub. Ele cria um NOVO commit com o efeito oposto, mantendo a integridade do histórico compartilhado.',
+        tip: 'CUIDADO com o git reset --hard! O comando reset reescreve o histórico local e pode apagar alterações de forma irreversível. Em repositórios compartilhados com a equipe, sempre prefira o git revert.',
+        code: '# Desfaz alterações locais não salvas em um arquivo\ngit restore index.html\n\n# Remove um arquivo da área de stage (unstage)\ngit restore --staged index.html\n\n# Desfaz um commit específico de forma segura criando um novo commit\ngit revert <hash-do-commit>',
+        lang: 'bash'
+      },
+      {
+        title: 'Investigação do histórico em árvore (git log avançado)',
+        text: 'Conforme seu projeto ganha novos commits e branches, o comando git log tradicional se torna longo e difícil de acompanhar. Com os parâmetros corretos, você transforma o terminal em um grafo visual interativo:',
+        tip: 'Você pode criar um "atalho" (alias) no Git para esse comando não precisar ser digitado toda vez: execute git config --global alias.grafo "log --oneline --graph --all" e depois basta digitar git grafo!',
+        code: '# Visualiza o histórico resumido com desenho das branches (grafo)\ngit log --oneline --graph --all\n\n# Filtra o histórico de alterações de um arquivo específico\ngit log -p README.md\n\n# Filtra commits por autor\ngit log --author="Seu Nome" --oneline',
+        lang: 'bash'
+      },
+      {
+        title: 'Marcar lançamentos de versão com git tag e Releases',
+        text: 'Tags são marcadores fixos no tempo que identificam marcos importantes do projeto (como v1.0.0, v1.2.0, v2.0.0), seguindo o Versionamento Semântico (SemVer: MAJOR.MINOR.PATCH).\n\nDiferente das branches, que se movem a cada novo commit, uma tag fica para sempre apontada para aquele commit específico.',
+        tip: 'Ao enviar tags anotadas para o GitHub, elas aparecem automaticamente na aba "Releases" do repositório, permitindo que qualquer usuário faça download do código empacotado daquela versão!',
+        code: '# Cria uma tag anotada com mensagem de versão\ngit tag -a v1.0.0 -m "Release: Primeira versão estável do projeto"\n\n# Lista as tags existentes no repositório\ngit tag\n\n# Publica a tag no GitHub\ngit push origin v1.0.0\n\n# Para enviar todas as tags de uma só vez:\ngit push origin --tags',
+        lang: 'bash'
+      }
     ],
-    exercise: 'Em um repositório de teste, simule um conflito entre duas branches, resolva os marcadores de conflito e conclua a integração. Não experimente reset --hard em trabalho importante.',
-    check: ['Sei quando usar merge.', 'Entendo para que serve stash.', 'Sei que restore pode descartar mudanças.', 'Consigo identificar e resolver um conflito.']
+    exercise: 'Pratique o fluxo avançado: 1. Na branch main, crie a tag v1.0.0 e confira com git tag. 2. Na branch dev, faça uma alteração, guarde com git stash, confira com git stash list e recupere com git stash pop. 3. Conclua o commit, volte para a main e realize o git merge dev. 4. Visualize a árvore completa com git log --oneline --graph --all.',
+    check: [
+      'Entendo como funciona o git merge e sei identificar e resolver marcadores de conflito.',
+      'Sei utilizar o git stash para guardar alterações temporárias ao trocar de branch.',
+      'Compreendo a diferença entre git restore (descarte local) e git revert (novo commit de reversão).',
+      'Consigo visualizar o grafo de branches com git log --oneline --graph --all.',
+      'Sei criar tags anotadas de versão (git tag -a) e publicá-las no GitHub.'
+    ]
   },
   {
     id: 6, title: 'Git no Visual Studio Code', short: 'Fluxo visual integrado', icon: Code2, duration: '25 min',
