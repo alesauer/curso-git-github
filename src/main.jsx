@@ -879,20 +879,73 @@ function App() {
   const completedCount = modules.filter(m => completed[m.id]).length
   const totalChecks = modules.reduce((sum, m) => sum + m.check.length, 0)
   const checkedCount = modules.reduce((sum, m) => sum + m.check.filter((_, i) => checked[`${m.id}-${i}`]).length, 0)
+  const allModulesDone = modules.length > 0 && modules.every(m => !!completed[m.id])
 
-  // Progress: 50% from modules completed + 50% from checklist items
-  const progress = Math.min(
-    100,
-    Math.round(
-      ((completedCount / modules.length) * 50) +
-      (totalChecks > 0 ? (checkedCount / totalChecks) * 50 : 0)
-    )
-  )
+  // Progress: 100% when all 7 modules are completed, or proportional based on modules + checks
+  const progress = allModulesDone
+    ? 100
+    : Math.min(
+        99,
+        Math.round(
+          ((completedCount / modules.length) * 75) +
+          (totalChecks > 0 ? (checkedCount / totalChecks) * 25 : 0)
+        )
+      )
 
   const selectModule = (id) => {
     setActiveId(id)
     setMobileMenu(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const triggerCertificateAndEmail = (studentProfile) => {
+    const profile = studentProfile || student
+    if (!profile) {
+      setShowRegisterModal(true)
+      return
+    }
+
+    try {
+      confetti({
+        particleCount: 150,
+        spread: 90,
+        origin: { y: 0.6 }
+      })
+    } catch (e) {
+      console.warn('Confetti error:', e)
+    }
+
+    setShowCertModal(true)
+
+    const emailSentKey = `${STORAGE_KEYS.SENT_PREFIX}${profile.email}`
+    const alreadySent = localStorage.getItem(emailSentKey)
+
+    if (!alreadySent) {
+      const certCode = generateCertificateCode(profile.name, issueDate)
+      setCertEmailStatus('sending')
+      setCertEmailMsg('')
+
+      sendCertificateEmail(profile, certCode, issueDate)
+        .then((result) => {
+          setCertEmailStatus('sent')
+          if (result.simulated) {
+            setCertEmailMsg(result.message)
+          } else {
+            setCertEmailMsg(`Certificado enviado com sucesso para ${profile.email}.`)
+          }
+          try {
+            localStorage.setItem(emailSentKey, 'true')
+          } catch (err) {}
+        })
+        .catch((err) => {
+          console.error('Erro ao enviar certificado:', err)
+          setCertEmailStatus('error')
+          setCertEmailMsg(err.text || err.message || 'Falha ao enviar e-mail via EmailJS.')
+        })
+    } else {
+      setCertEmailStatus('sent')
+      setCertEmailMsg(`Certificado já despachado anteriormente para ${profile.email}.`)
+    }
   }
 
   const handleStartCourse = (targetModuleId = 1) => {
@@ -910,6 +963,8 @@ function App() {
     if (pendingModule) {
       selectModule(pendingModule)
       setPendingModule(null)
+    } else if (allModulesDone) {
+      triggerCertificateAndEmail(newStudentData)
     }
   }
 
@@ -923,59 +978,62 @@ function App() {
 
   const markComplete = () => {
     if (activeId) {
+      const willBeComplete = !completed[activeId]
       setCompleted(prev => {
-        const next = { ...prev, [activeId]: !prev[activeId] }
+        const next = { ...prev, [activeId]: willBeComplete }
         saveToStorage(STORAGE_KEYS.COMPLETED, next)
         return next
       })
+
+      // When completing a module, automatically mark its checklist items as completed
+      if (willBeComplete) {
+        setChecked(prev => {
+          const next = { ...prev }
+          const currentMod = modules.find(m => m.id === activeId)
+          if (currentMod) {
+            currentMod.check.forEach((_, idx) => {
+              next[`${activeId}-${idx}`] = true
+            })
+          }
+          saveToStorage(STORAGE_KEYS.CHECKED, next)
+          return next
+        })
+      }
     }
+  }
+
+  const handleFinishCourse = () => {
+    // 1. Mark all modules as complete and all checklist items as checked
+    const allCompleted = {}
+    const allChecked = { ...checked }
+    modules.forEach(m => {
+      allCompleted[m.id] = true
+      m.check.forEach((_, i) => {
+        allChecked[`${m.id}-${i}`] = true
+      })
+    })
+    setCompleted(allCompleted)
+    setChecked(allChecked)
+    saveToStorage(STORAGE_KEYS.COMPLETED, allCompleted)
+    saveToStorage(STORAGE_KEYS.CHECKED, allChecked)
+
+    // 2. Trigger certificate and email
+    if (!student) {
+      setShowRegisterModal(true)
+      return
+    }
+
+    triggerCertificateAndEmail(student)
   }
 
   // Automatic celebration and email dispatch when reaching 100%
   useEffect(() => {
-    if (progress === 100) {
-      if (!student) {
-        setShowRegisterModal(true)
-        return
-      }
-
+    if (progress === 100 && student?.email) {
       const emailSentKey = `${STORAGE_KEYS.SENT_PREFIX}${student.email}`
       const alreadySent = localStorage.getItem(emailSentKey)
 
       if (!alreadySent) {
-        try {
-          confetti({
-            particleCount: 140,
-            spread: 80,
-            origin: { y: 0.6 }
-          })
-        } catch (e) {
-          console.warn('Confetti error:', e)
-        }
-
-        const certCode = generateCertificateCode(student.name, issueDate)
-        setCertEmailStatus('sending')
-        setCertEmailMsg('')
-
-        sendCertificateEmail(student, certCode, issueDate)
-          .then((result) => {
-            setCertEmailStatus('sent')
-            if (result.simulated) {
-              setCertEmailMsg(result.message)
-            } else {
-              setCertEmailMsg(`Certificado enviado para ${student.email}.`)
-            }
-            try {
-              localStorage.setItem(emailSentKey, 'true')
-            } catch (err) {}
-          })
-          .catch((err) => {
-            console.error('Erro ao enviar certificado:', err)
-            setCertEmailStatus('error')
-            setCertEmailMsg(err.text || err.message || 'Falha ao enviar e-mail.')
-          })
-
-        setShowCertModal(true)
+        triggerCertificateAndEmail(student)
       }
     }
   }, [progress, student, issueDate])
@@ -1139,6 +1197,18 @@ function App() {
         <main className="main-content">
           {activeId === null ? (
             <div className="home-view">
+              {progress === 100 && (
+                <div className="course-completed-celebration-card" style={{ margin: '0 0 24px' }}>
+                  <div className="celebration-icon"><Award size={32} /></div>
+                  <div className="celebration-text">
+                    <h3>🎉 Parabéns! Você concluiu 100% do curso de Git &amp; GitHub!</h3>
+                    <p>Seu Certificado Oficial está emitido e autenticado. Você pode visualizá-lo, imprimi-lo ou reenviá-lo a qualquer momento.</p>
+                  </div>
+                  <button className="primary-btn complete-course-btn" onClick={() => triggerCertificateAndEmail()}>
+                    <Award size={17} /> Visualizar Meu Certificado
+                  </button>
+                </div>
+              )}
               <section className="welcome-card">
                 <div className="welcome-copy">
                   <div className="eyebrow"><span className="eyebrow-dot"/> TRILHA PRÁTICA DE DESENVOLVIMENTO</div>
@@ -1299,6 +1369,19 @@ function App() {
                 </div>
               </section>
 
+              {allModulesDone && (
+                <div className="course-completed-celebration-card">
+                  <div className="celebration-icon"><Award size={32} /></div>
+                  <div className="celebration-text">
+                    <h3>🎉 Parabéns! Você concluiu todos os 7 módulos do curso!</h3>
+                    <p>Seu Certificado Oficial com código autenticador está disponível para visualização, impressão e envio por e-mail.</p>
+                  </div>
+                  <button className="primary-btn complete-course-btn" onClick={() => triggerCertificateAndEmail()}>
+                    <Award size={17} /> Visualizar Certificado
+                  </button>
+                </div>
+              )}
+
               <div className="lesson-footer">
                 <button
                   className="secondary-btn"
@@ -1313,13 +1396,21 @@ function App() {
                   {completed[activeId] ? <CheckCircle2 size={17}/> : <Check size={17}/>}{' '}
                   {completed[activeId] ? 'Etapa concluída' : 'Marcar como concluída'}
                 </button>
-                <button
-                  className="primary-btn next-btn"
-                  disabled={activeId === modules.length}
-                  onClick={() => selectModule(activeId + 1)}
-                >
-                  Próximo módulo <ChevronRight size={16}/>
-                </button>
+                {activeId === modules.length ? (
+                  <button
+                    className="primary-btn complete-course-btn"
+                    onClick={handleFinishCourse}
+                  >
+                    <Award size={17}/> {allModulesDone ? 'Ver Certificado' : 'Concluir Curso & Emitir Certificado'}
+                  </button>
+                ) : (
+                  <button
+                    className="primary-btn next-btn"
+                    onClick={() => selectModule(activeId + 1)}
+                  >
+                    Próximo módulo <ChevronRight size={16}/>
+                  </button>
+                )}
               </div>
             </div>
           )}

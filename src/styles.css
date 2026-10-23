@@ -2024,6 +2024,66 @@ h1 span {
   color: var(--muted);
 }
 
+/* Celebration Card on Completion */
+.course-completed-celebration-card {
+  margin: 28px 0;
+  padding: 22px 24px;
+  background: linear-gradient(135deg, #f2faee 0%, #e3f5dc 100%);
+  border: 2px solid #b6e4ab;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  box-shadow: 0 8px 24px rgba(39, 112, 23, 0.12);
+  flex-wrap: wrap;
+}
+
+.course-completed-celebration-card .celebration-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--green);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  flex: 0 0 52px;
+  box-shadow: 0 4px 12px rgba(45, 93, 27, 0.25);
+}
+
+.course-completed-celebration-card .celebration-text {
+  flex: 1;
+  min-width: 240px;
+}
+
+.course-completed-celebration-card h3 {
+  font: 800 18px/1.3 var(--font-heading);
+  color: var(--green-dark);
+  margin: 0 0 5px;
+}
+
+.course-completed-celebration-card p {
+  font-size: 13.5px;
+  color: var(--ink-light);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.complete-course-btn {
+  background: linear-gradient(135deg, #1b5b0b 0%, #2e8b15 100%) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 14px rgba(45, 93, 27, 0.3) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.complete-course-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(45, 93, 27, 0.4) !important;
+}
+
 /* Modal Overlay & Base */
 .app-modal-backdrop {
   position: fixed;
