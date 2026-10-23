@@ -22,6 +22,23 @@ npm run build
 npm run preview
 ```
 
+## Executar com Docker e Docker Compose
+
+Para subir a aplicação encapsulada em container (Nginx otimizado para produção):
+
+```bash
+# Constrói a imagem e inicia o container em segundo plano
+docker compose up -d --build
+
+# Para visualizar os logs
+docker compose logs -f
+
+# Para parar o container
+docker compose down
+```
+
+Acesse a aplicação no navegador em: **http://localhost:3090** (ou na porta configurada na variável `PORT`).
+
 ## Repositório de laboratório
 https://github.com/alesauer/tutorial-git
 

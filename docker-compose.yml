@@ -1,0 +1,11 @@
+services:
+  curso-git-github:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: curso-git-github
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3090}:80"
+    environment:
+      - NODE_ENV=production
