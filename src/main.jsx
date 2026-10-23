@@ -3,11 +3,11 @@ import { createRoot } from 'react-dom/client'
 import emailjs from '@emailjs/browser'
 import confetti from 'canvas-confetti'
 import {
-  AlertTriangle, Award, BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, ChevronsRight,
-  CircleHelp, Clipboard, Clock3, Code2, Command, Compass, Cpu, Download, Edit3, ExternalLink, FileCode2,
+  AlertTriangle, ArrowRight, Award, BookOpen, Camera, Check, CheckCheck, CheckCircle2, ChevronLeft, ChevronRight, ChevronsRight,
+  CircleHelp, Clipboard, Clock3, Code2, Command, Compass, Cpu, Download, Edit3, ExternalLink, Eye, FileCode2,
   GitBranch, GitCommitHorizontal, GitFork, GitPullRequest, Github, Globe, GraduationCap,
-  Home, Layers, Lightbulb, Mail, Menu, PanelLeftClose, PanelLeftOpen, Play, Printer, Rocket, Search,
-  Send, Settings, ShieldCheck, Sparkles, Terminal, User, UserCheck, Users, Workflow, X
+  Home, Image as ImageIcon, Layers, Lightbulb, Link2, Mail, Menu, PanelLeftClose, PanelLeftOpen, Play, Printer, Rocket, Search,
+  Send, Settings, ShieldCheck, Sparkles, Terminal, Trash2, UploadCloud, User, UserCheck, Users, Workflow, X
 } from 'lucide-react'
 import './styles.css'
 
@@ -17,6 +17,7 @@ const STORAGE_KEYS = {
   STUDENT: 'git_course_student',
   COMPLETED: 'git_course_completed',
   CHECKED: 'git_course_checked',
+  EVIDENCES: 'git_course_evidences',
   SENT_PREFIX: 'git_course_email_sent_'
 }
 
@@ -34,6 +35,79 @@ function saveToStorage(key, value) {
     localStorage.setItem(key, JSON.stringify(value))
   } catch (err) {
     console.error('Erro ao salvar no localStorage:', err)
+  }
+}
+
+async function compressImageFile(file, maxWidth = 1200, quality = 0.7) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const img = document.createElement('img')
+      img.onload = () => {
+        let width = img.width
+        let height = img.height
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width)
+          width = maxWidth
+        }
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, width, height)
+        const dataUrl = canvas.toDataURL('image/webp', quality)
+        resolve(dataUrl)
+      }
+      img.onerror = () => reject(new Error('Erro ao carregar a imagem para compressão.'))
+      img.src = e.target.result
+    }
+    reader.onerror = () => reject(new Error('Erro ao ler arquivo.'))
+    reader.readAsDataURL(file)
+  })
+}
+
+const moduleEvidenceGuide = {
+  1: {
+    title: 'Print do Git Bash instalado',
+    instruction: 'Tire um print da janela do Git Bash executando "git --version" e "pwd", comprovando a instalação no Windows.',
+    allowLink: false,
+    placeholder: ''
+  },
+  2: {
+    title: 'Print da identidade Git configurada',
+    instruction: 'Tire um print do terminal Git Bash executando "git config --global --list", mostrando seu user.name e user.email.',
+    allowLink: false,
+    placeholder: ''
+  },
+  3: {
+    title: 'Link do repositório ou print do Git status/log',
+    instruction: 'Cole o link do repositório no GitHub (ex: https://github.com/seu-usuario/tutorial-git) OU anexe print do terminal com "git status" e "git log --oneline".',
+    allowLink: true,
+    placeholder: 'https://github.com/seu-usuario/tutorial-git'
+  },
+  4: {
+    title: 'Link da branch dev ou print de branches/merge',
+    instruction: 'Cole o link da branch "dev" no GitHub OU anexe print do terminal executando "git branch -a" e "git log".',
+    allowLink: true,
+    placeholder: 'https://github.com/seu-usuario/tutorial-git/tree/dev'
+  },
+  5: {
+    title: 'Link do Pull Request ou print da tela do PR',
+    instruction: 'Cole o link do Pull Request aberto no GitHub OU anexe o print da tela do seu Pull Request.',
+    allowLink: true,
+    placeholder: 'https://github.com/alesauer/tutorial-git/pull/...'
+  },
+  6: {
+    title: 'Print dos comandos avançados (stash / cherry-pick / bisect)',
+    instruction: 'Tire um print do terminal executando "git stash list" ou "git cherry-pick" ou "git bisect" comprovando o laboratório avançado.',
+    allowLink: false,
+    placeholder: ''
+  },
+  7: {
+    title: 'Print do histórico rebase ou link do repositório final',
+    instruction: 'Tire um print do terminal com "git log --oneline -n 5" demonstrando o histórico linear após o rebase OU cole o link do repositório.',
+    allowLink: true,
+    placeholder: 'https://github.com/seu-usuario/tutorial-git'
   }
 }
 
@@ -698,6 +772,14 @@ function RegisterModal({ isOpen, onClose, currentStudent, onSave }) {
         </div>
 
         <form onSubmit={handleSubmit} className="app-modal-body">
+          <div className="modal-evidence-alert">
+            <Camera size={18} />
+            <div>
+              <strong>Evidências práticas obrigatórias:</strong>
+              <span>Para emitir o certificado, é obrigatório anexar os prints do Git Bash e links do GitHub ao final de cada módulo. Lembre-se de registrar suas evidências durante as aulas!</span>
+            </div>
+          </div>
+
           {error && (
             <div className="step-warning-box" style={{ margin: '0 0 16px', padding: '10px 14px' }}>
               <AlertTriangle size={16} />
@@ -729,7 +811,7 @@ function RegisterModal({ isOpen, onClose, currentStudent, onSave }) {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-            <span className="form-hint">Ao atingir 100% de conclusão, você receberá a notificação oficial neste e-mail.</span>
+            <span className="form-hint">Ao atingir 100% de conclusão com as evidências anexadas, você receberá a notificação oficial neste e-mail.</span>
           </div>
 
           <div className="form-actions">
@@ -748,7 +830,260 @@ function RegisterModal({ isOpen, onClose, currentStudent, onSave }) {
   )
 }
 
-function CertificateModal({ isOpen, onClose, student, issueDate, emailStatus, emailMsg, onResendEmail }) {
+function EvidenceSection({ moduleId, currentEvidence, onSaveEvidence, onRemoveEvidence }) {
+  const guide = moduleEvidenceGuide[moduleId]
+  if (!guide) return null
+
+  const [linkInput, setLinkInput] = useState(currentEvidence?.type === 'link' ? currentEvidence.data : '')
+  const [isDragOver, setIsDragOver] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleProcessFile = async (file) => {
+    if (!file || !file.type.startsWith('image/')) {
+      setError('Por favor, selecione ou cole um arquivo de imagem válido (PNG, JPEG, WebP).')
+      return
+    }
+    setError('')
+    setLoading(true)
+    try {
+      const compressedDataUrl = await compressImageFile(file, 1200, 0.7)
+      onSaveEvidence(moduleId, {
+        type: 'image',
+        data: compressedDataUrl,
+        filename: file.name || 'print-terminal.webp',
+        updatedAt: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      })
+    } catch (err) {
+      console.error('Erro na compressão:', err)
+      setError('Não foi possível processar a imagem do print.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handlePaste = (e) => {
+    const items = e.clipboardData?.items
+    if (!items) return
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile()
+        handleProcessFile(file)
+        e.preventDefault()
+        break
+      }
+    }
+  }
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file) handleProcessFile(file)
+  }
+
+  const handleSaveLink = (e) => {
+    e.preventDefault()
+    const trimmed = linkInput.trim()
+    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+      setError('Por favor, informe uma URL válida iniciando com https://')
+      return
+    }
+    setError('')
+    onSaveEvidence(moduleId, {
+      type: 'link',
+      data: trimmed,
+      updatedAt: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    })
+  }
+
+  return (
+    <section className="evidence-card" onPaste={handlePaste} tabIndex={0} aria-label="Seção de comprovação do laboratório">
+      <div className="evidence-header">
+        <div className="evidence-header-left">
+          <div className="evidence-icon-circle"><Camera size={22} /></div>
+          <div>
+            <h3>Comprovação Prática (Evidência Obrigatória)</h3>
+            <p>Anexe a evidência deste módulo para habilitar a emissão do seu certificado.</p>
+          </div>
+        </div>
+        <span className={`evidence-status-badge ${currentEvidence ? 'is-attached' : 'is-pending'}`}>
+          {currentEvidence ? <CheckCheck size={14} /> : <AlertTriangle size={14} />}
+          {currentEvidence ? 'Evidência Anexada' : 'Evidência Pendente'}
+        </span>
+      </div>
+
+      <div className="evidence-guide-box">
+        <strong>O que registrar:</strong> {guide.instruction}
+      </div>
+
+      {error && (
+        <div className="step-warning-box" style={{ margin: '0 0 14px', padding: '10px 14px' }}>
+          <AlertTriangle size={16} />
+          <div><span>{error}</span></div>
+        </div>
+      )}
+
+      {currentEvidence ? (
+        <div className="evidence-attached-preview">
+          {currentEvidence.type === 'image' ? (
+            <img
+              src={currentEvidence.data}
+              alt="Evidência do laboratório"
+              className="attached-media-thumb"
+              onClick={() => window.open(currentEvidence.data, '_blank')}
+              title="Clique para abrir imagem em tamanho real"
+            />
+          ) : (
+            <div className="evidence-icon-circle" style={{ width: 40, height: 40 }}>
+              <Link2 size={20} />
+            </div>
+          )}
+
+          <div className="attached-info">
+            <strong>
+              <CheckCheck size={16} /> Comprovante registrado com sucesso!
+            </strong>
+            {currentEvidence.type === 'image' ? (
+              <span>Arquivo: {currentEvidence.filename || 'Captura de tela'} · Anexado às {currentEvidence.updatedAt}</span>
+            ) : (
+              <div>
+                <a href={currentEvidence.data} target="_blank" rel="noreferrer" className="attached-link-preview">
+                  <ExternalLink size={13} /> {currentEvidence.data}
+                </a>
+                <span>Registrado às {currentEvidence.updatedAt}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="attached-actions">
+            {currentEvidence.type === 'image' && (
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={() => window.open(currentEvidence.data, '_blank')}
+                title="Visualizar em tamanho real"
+                style={{ padding: '8px 12px' }}
+              >
+                <Eye size={14} /> Ver
+              </button>
+            )}
+            <button
+              type="button"
+              className="secondary-btn"
+              onClick={() => onRemoveEvidence(moduleId)}
+              title="Remover e anexar outra"
+              style={{ color: '#b91c1c', padding: '8px 12px' }}
+            >
+              <Trash2 size={14} /> Substituir
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div>
+          {/* Dropzone para Imagem / Ctrl+V */}
+          <div
+            className={`evidence-dropzone ${isDragOver ? 'is-dragover' : ''}`}
+            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true) }}
+            onDragLeave={() => setIsDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault()
+              setIsDragOver(false)
+              const file = e.dataTransfer.files?.[0]
+              if (file) handleProcessFile(file)
+            }}
+            onClick={() => document.getElementById(`file-input-${moduleId}`)?.click()}
+          >
+            <input
+              id={`file-input-${moduleId}`}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+            <div className="dropzone-inner">
+              <UploadCloud size={32} />
+              <div className="dropzone-title">
+                {loading ? 'Comprimindo e processando imagem...' : 'Clique para selecionar print OU cole com Ctrl + V'}
+              </div>
+              <div className="dropzone-desc">Formatos PNG, JPG, JPEG ou WebP</div>
+              <div className="dropzone-shortcut">Dica: Tire o print (Win + Shift + S) e aperte Ctrl+V aqui</div>
+            </div>
+          </div>
+
+          {/* Opção alternativa de link para módulos que aceitam GitHub */}
+          {guide.allowLink && (
+            <form onSubmit={handleSaveLink} className="evidence-link-box">
+              <label htmlFor={`link-input-${moduleId}`}>Ou envie o link do seu repositório / Pull Request no GitHub:</label>
+              <div className="evidence-link-row">
+                <input
+                  id={`link-input-${moduleId}`}
+                  type="url"
+                  placeholder={guide.placeholder || 'https://github.com/...'}
+                  value={linkInput}
+                  onChange={(e) => setLinkInput(e.target.value)}
+                />
+                <button type="submit" className="primary-btn" disabled={!linkInput.trim()}>
+                  <Link2 size={15} /> Salvar Link
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      )}
+    </section>
+  )
+}
+
+function MissingEvidenceModal({ isOpen, onClose, missingModules, onGoToModule }) {
+  if (!isOpen) return null
+
+  return (
+    <div className="app-modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="app-modal-box missing-evidence-modal-box" onClick={(e) => e.stopPropagation()}>
+        <div className="app-modal-header">
+          <div>
+            <div className="section-kicker" style={{ color: '#b45309' }}>EVIDÊNCIAS PENDENTES</div>
+            <h3>Faltam evidências para liberar o certificado!</h3>
+            <p>
+              Para comprovar que você realizou a prática completa, anexe os prints ou links dos seguintes módulos:
+            </p>
+          </div>
+          <button className="app-modal-close-btn" onClick={onClose} aria-label="Fechar">
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="app-modal-body">
+          <div className="missing-list">
+            {missingModules.map(m => (
+              <div className="missing-item" key={m.id}>
+                <div className="missing-item-info">
+                  <strong>Módulo {m.id}: {m.title}</strong>
+                  <span>{moduleEvidenceGuide[m.id]?.instruction}</span>
+                </div>
+                <button
+                  type="button"
+                  className="primary-btn"
+                  onClick={() => { onClose(); onGoToModule(m.id) }}
+                  style={{ padding: '8px 14px', fontSize: 13 }}
+                >
+                  Anexar <ArrowRight size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="form-actions">
+            <button type="button" className="secondary-btn" onClick={onClose}>
+              Entendido, vou anexar agora
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CertificateModal({ isOpen, onClose, student, issueDate, emailStatus, emailMsg, onResendEmail, evidencesCount = 7 }) {
   if (!isOpen) return null
 
   const certCode = generateCertificateCode(student?.name, issueDate)
@@ -764,7 +1099,8 @@ function CertificateModal({ isOpen, onClose, student, issueDate, emailStatus, em
     'Branches, Merge & Resolução de Conflitos',
     'GitHub, Forks & Pull Requests',
     'Git Stash, Cherry-pick & Bisect',
-    'Git Rebase Interativo & Boas Práticas'
+    'Git Rebase Interativo & Boas Práticas',
+    `Homologação de ${evidencesCount} de 7 Evidências Práticas (Prints & GitHub)`
   ]
 
   return (
@@ -876,13 +1212,15 @@ function App() {
   const [checked, setChecked] = useState(() => loadFromStorage(STORAGE_KEYS.CHECKED, {}))
   const [mobileMenu, setMobileMenu] = useState(false)
 
-  // Registration & Certificate State
+  // Registration, Certificate & Evidence State
   const [student, setStudent] = useState(() => loadFromStorage(STORAGE_KEYS.STUDENT, null))
   const [showRegisterModal, setShowRegisterModal] = useState(false)
   const [pendingModule, setPendingModule] = useState(null)
   const [showCertModal, setShowCertModal] = useState(false)
+  const [showMissingModal, setShowMissingModal] = useState(false)
   const [certEmailStatus, setCertEmailStatus] = useState('idle')
   const [certEmailMsg, setCertEmailMsg] = useState('')
+  const [evidences, setEvidences] = useState(() => loadFromStorage(STORAGE_KEYS.EVIDENCES, {}))
   const [issueDate] = useState(() =>
     new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
   )
@@ -892,6 +1230,9 @@ function App() {
   const totalChecks = modules.reduce((sum, m) => sum + m.check.length, 0)
   const checkedCount = modules.reduce((sum, m) => sum + m.check.filter((_, i) => checked[`${m.id}-${i}`]).length, 0)
   const allModulesDone = modules.length > 0 && modules.every(m => !!completed[m.id])
+
+  const missingEvidenceModules = modules.filter(m => !evidences[m.id]?.data)
+  const hasAllEvidences = missingEvidenceModules.length === 0
 
   // Progress: 100% when all 7 modules are completed, or proportional based on modules + checks
   const progress = allModulesDone
@@ -910,10 +1251,32 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  const handleSaveEvidence = (moduleId, evidenceData) => {
+    setEvidences(prev => {
+      const next = { ...prev, [moduleId]: evidenceData }
+      saveToStorage(STORAGE_KEYS.EVIDENCES, next)
+      return next
+    })
+  }
+
+  const handleRemoveEvidence = (moduleId) => {
+    setEvidences(prev => {
+      const next = { ...prev }
+      delete next[moduleId]
+      saveToStorage(STORAGE_KEYS.EVIDENCES, next)
+      return next
+    })
+  }
+
   const triggerCertificateAndEmail = (studentProfile) => {
     const profile = studentProfile || student
     if (!profile) {
       setShowRegisterModal(true)
+      return
+    }
+
+    if (!hasAllEvidences) {
+      setShowMissingModal(true)
       return
     }
 
@@ -975,7 +1338,7 @@ function App() {
     if (pendingModule) {
       selectModule(pendingModule)
       setPendingModule(null)
-    } else if (allModulesDone) {
+    } else if (allModulesDone && hasAllEvidences) {
       triggerCertificateAndEmail(newStudentData)
     }
   }
@@ -1029,18 +1392,25 @@ function App() {
     saveToStorage(STORAGE_KEYS.COMPLETED, allCompleted)
     saveToStorage(STORAGE_KEYS.CHECKED, allChecked)
 
-    // 2. Trigger certificate and email
+    // 2. Prompt registration if not registered
     if (!student) {
       setShowRegisterModal(true)
       return
     }
 
+    // 3. Prompt missing evidence modal if any evidence is missing!
+    if (!hasAllEvidences) {
+      setShowMissingModal(true)
+      return
+    }
+
+    // 4. Trigger certificate and email
     triggerCertificateAndEmail(student)
   }
 
-  // Automatic celebration and email dispatch when reaching 100%
+  // Automatic celebration and email dispatch when reaching 100% AND has all evidences
   useEffect(() => {
-    if (progress === 100 && student?.email) {
+    if (progress === 100 && student?.email && hasAllEvidences) {
       const emailSentKey = `${STORAGE_KEYS.SENT_PREFIX}${student.email}`
       const alreadySent = localStorage.getItem(emailSentKey)
 
@@ -1048,7 +1418,7 @@ function App() {
         triggerCertificateAndEmail(student)
       }
     }
-  }, [progress, student, issueDate])
+  }, [progress, student, hasAllEvidences, issueDate])
 
   const handleResendEmail = async () => {
     if (!student?.email) {
@@ -1249,6 +1619,19 @@ function App() {
                 </div>
               </section>
 
+              <section className="start-course-warning-banner">
+                <div className="warning-banner-icon"><Camera size={26} /></div>
+                <div className="warning-banner-content">
+                  <div className="warning-banner-tag">AVISO OBRIGATÓRIO PARA O CERTIFICADO</div>
+                  <h4>Atenção Estudante: Tire prints das suas práticas durante cada módulo!</h4>
+                  <p>
+                    Para que seu <strong>Certificado Oficial</strong> seja liberado ao final do curso, é obrigatório comprovar a realização das atividades práticas anexando os prints dos comandos no terminal (Git Bash) ou links dos seus repositórios e Pull Requests no GitHub em cada um dos 7 módulos.
+                    <br />
+                    <strong>Evite ter que refazer os passos:</strong> conforme for executando os comandos e exercícios das aulas, tire uma captura de tela (<kbd>Win + Shift + S</kbd>) e anexe na etapa correspondente!
+                  </p>
+                </div>
+              </section>
+
               <section className="stats-row" aria-label="Informações do curso">
                 <div className="stat-card"><div className="stat-icon"><BookOpen size={19}/></div><div><strong>7 módulos</strong><span>Do básico ao avançado</span></div></div>
                 <div className="stat-card"><div className="stat-icon"><Clock3 size={19}/></div><div><strong>~3 horas</strong><span>Conteúdo prático</span></div></div>
@@ -1277,6 +1660,19 @@ function App() {
                 </div>
                 <span className="duration"><Clock3 size={14}/>{activeModule.duration}</span>
               </section>
+
+              <div className="lesson-evidence-reminder">
+                <div>
+                  <Camera size={18} />
+                  <span>
+                    <strong>Lembrete de Evidência:</strong> Não esqueça de capturar o print dos comandos no Git Bash ou copiar o link do GitHub desta etapa para anexar na seção abaixo.
+                  </span>
+                </div>
+                <span className={`evidence-status-badge ${evidences[activeId] ? 'is-attached' : 'is-pending'}`}>
+                  {evidences[activeId] ? <CheckCheck size={14} /> : <AlertTriangle size={14} />}
+                  {evidences[activeId] ? 'Evidência Anexada' : 'Evidência Pendente'}
+                </span>
+              </div>
 
               <div className="objective-card">
                 <div className="objective-icon"><GraduationCap size={20}/></div>
@@ -1381,6 +1777,13 @@ function App() {
                 </div>
               </section>
 
+              <EvidenceSection
+                moduleId={activeId}
+                currentEvidence={evidences[activeId]}
+                onSaveEvidence={handleSaveEvidence}
+                onRemoveEvidence={handleRemoveEvidence}
+              />
+
               {allModulesDone && (
                 <div className="course-completed-celebration-card">
                   <div className="celebration-icon"><Award size={32} /></div>
@@ -1434,6 +1837,16 @@ function App() {
         </main>
       </div>
 
+      <MissingEvidenceModal
+        isOpen={showMissingModal}
+        onClose={() => setShowMissingModal(false)}
+        missingModules={missingEvidenceModules}
+        onGoToModule={(modId) => {
+          setShowMissingModal(false)
+          selectModule(modId)
+        }}
+      />
+
       <RegisterModal
         isOpen={showRegisterModal}
         onClose={() => setShowRegisterModal(false)}
@@ -1449,6 +1862,7 @@ function App() {
         emailStatus={certEmailStatus}
         emailMsg={certEmailMsg}
         onResendEmail={handleResendEmail}
+        evidencesCount={modules.filter(m => !!evidences[m.id]?.data).length}
       />
     </div>
   )
