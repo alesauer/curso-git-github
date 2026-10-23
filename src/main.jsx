@@ -2,9 +2,9 @@ import React, { useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import {
   BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, ChevronsRight,
-  CircleHelp, Clipboard, Clock3, Code2, Command, ExternalLink, FileCode2,
+  CircleHelp, Clipboard, Clock3, Code2, Command, Download, ExternalLink, FileCode2,
   GitBranch, GitCommitHorizontal, GitFork, GitPullRequest, Github, GraduationCap,
-  Home, Menu, PanelLeftClose, PanelLeftOpen, Play, Search, Terminal, Users, X
+  Home, Menu, PanelLeftClose, PanelLeftOpen, Play, Search, Settings, Terminal, Users, X
 } from 'lucide-react'
 import './styles.css'
 
@@ -12,28 +12,107 @@ const repoUrl = 'https://github.com/alesauer/tutorial-git'
 
 const modules = [
   {
-    id: 1, title: 'Instalação do Git e Git Bash', short: 'Preparar o ambiente', icon: Terminal, duration: '15 min',
-    intro: 'Prepare o ambiente de desenvolvimento e confirme que o Git está pronto para uso no terminal.',
-    objective: 'Ao final, você terá o Git instalado e configurado com sua identidade de autoria.',
+    id: 1,
+    title: 'Download e Instalação do Git e Git Bash',
+    short: 'Download e Instalação',
+    icon: Download,
+    duration: '20 min',
+    intro: 'Passo a passo completo com links oficiais para download, instalação recomendada no Windows com Git Bash e preparação do ambiente local para projetos.',
+    objective: 'Ao final, você terá o instalador oficial baixado, o Git e Git Bash instalados corretamente no seu computador, e o terminal pronto para uso.',
     steps: [
-      { title: 'Verifique a instalação', text: 'Abra o Git Bash ou o terminal integrado do VS Code e consulte a versão instalada.', code: 'git --version', lang: 'bash' },
-      { title: 'Configure sua identidade', text: 'Use seu nome e o e-mail que deseja associar aos commits deste computador.', code: 'git config --global user.name "Seu Nome"\ngit config --global user.email "seu-email@exemplo.com"', lang: 'bash' },
-      { title: 'Confira as configurações', text: 'Revise os valores salvos antes de começar a versionar seus projetos.', code: 'git config --global --list', lang: 'bash' }
+      {
+        title: 'Baixar o instalador oficial do Git para Windows',
+        text: 'Acesse o site oficial do Git e faça o download da versão mais recente do instalador de 64-bit para Windows. O pacote já contém o Git Core, o terminal Git Bash e o utilitário gráfico Git GUI.',
+        links: [
+          { url: 'https://git-scm.com/download/win', label: 'Download oficial do Git (git-scm.com)' },
+          { url: 'https://gitforwindows.org/', label: 'Site oficial Git for Windows' }
+        ],
+        code: 'https://git-scm.com/download/win',
+        lang: 'text'
+      },
+      {
+        title: 'Executar o instalador (Opções recomendadas)',
+        text: 'Execute o arquivo baixado (Git-2.xx-64-bit.exe) e siga as telas do assistente com as seguintes opções recomendadas:\n• Select Components: Marque "Git Bash Here" e "Git GUI Here".\n• Default Editor: Selecione o Visual Studio Code (ou Nano) como editor padrão.\n• Adjusting your PATH: Escolha a opção recomendada "Git from the command line and also from 3rd-party software".\n• Terminal Emulator: Escolha "Use MinTTY (the default terminal of MSYS2)".\n• Line Ending: Mantenha "Checkout Windows-style, commit Unix-style line endings".\nAvance com Next até finalizar a instalação.',
+        code: '# Nenhuma linha de comando necessária nesta etapa.\n# Basta seguir o assistente mantendo as opções recomendadas acima.',
+        lang: 'text'
+      },
+      {
+        title: 'Abrir o Git Bash e testar a instalação',
+        text: 'Abra o Git Bash pelo menu Iniciar do Windows ou clicando com o botão direito em qualquer pasta e selecionando "Open Git Bash here". Digite o comando abaixo para confirmar que o Git foi instalado com sucesso:',
+        code: 'git --version',
+        lang: 'bash'
+      },
+      {
+        title: 'Preparar sua pasta de trabalho e projetos',
+        text: 'Antes de iniciar qualquer projeto com Git e GitHub, familiarize-se com os comandos de navegação do terminal e crie uma pasta organizada para hospedar seus repositórios:',
+        code: '# 1. Consulte o diretório atual onde você está:\npwd\n\n# 2. Crie uma pasta para seus projetos de desenvolvimento (ex: dev ou projetos):\nmkdir -p ~/dev\n\n# 3. Acesse a pasta criada:\ncd ~/dev\n\n# 4. Confirme que você está no diretório correto:\npwd\nls -la',
+        lang: 'bash'
+      }
     ],
-    exercise: 'Instale o Git, execute os três comandos e confira se o nome e o e-mail estão corretos.',
-    check: ['O comando git --version exibe uma versão.', 'O nome e o e-mail estão configurados.', 'Sei abrir o Git Bash.']
+    exercise: 'Baixe o Git for Windows pelos links fornecidos, conclua a instalação com o Git Bash, abra o terminal e execute os comandos git --version e pwd para certificar que seu ambiente está pronto.',
+    check: [
+      'Acessei o link oficial e baixei o instalador do Git.',
+      'Concluí a instalação incluindo o Git Bash.',
+      'Abri o Git Bash pelo menu Iniciar ou menu de contexto.',
+      'O comando git --version retornou a versão instalada.',
+      'Naveguei no terminal e preparei minha pasta de projetos.'
+    ]
   },
   {
-    id: 2, title: 'Conta GitHub e repositórios', short: 'Conhecer o GitHub', icon: Github, duration: '20 min',
-    intro: 'Crie ou configure sua conta e prepare o repositório remoto que será usado nos exercícios do curso.',
-    objective: 'Ao final, você terá acesso ao repositório de laboratório e saberá distinguir repositório local e remoto.',
+    id: 2,
+    title: 'Configuração Inicial do Git e Conta GitHub',
+    short: 'Configuração inicial',
+    icon: Settings,
+    duration: '25 min',
+    intro: 'Realize a configuração inicial obrigatória do Git no seu computador (identidade de autoria com nome e e-mail), padronize a branch inicial como main e conecte sua conta do GitHub.',
+    objective: 'Ao final, você terá o Git configurado com sua autoria em todos os commits futuros, saberá consultar as configurações salvas e terá sua conta do GitHub conectada ao repositório de laboratório.',
     steps: [
-      { title: 'Acesse o GitHub', text: 'Entre na sua conta ou crie uma em github.com. Use autenticação segura e mantenha suas credenciais privadas.', code: 'https://github.com/', lang: 'text' },
-      { title: 'Abra o repositório de laboratório', text: 'Este curso utilizará o repositório disponibilizado pelo professor.', code: 'https://github.com/alesauer/tutorial-git', lang: 'text' },
-      { title: 'Confira os dados do repositório', text: 'Na página do projeto, localize o botão Code e observe as opções para copiar a URL de clonagem.', code: 'https://github.com/alesauer/tutorial-git.git', lang: 'text' }
+      {
+        title: 'Configurar sua identidade no Git (Nome e E-mail)',
+        text: 'O Git vincula seu nome e e-mail a cada versão (commit) criada no histórico. IMPORTANTE: Use o mesmo endereço de e-mail cadastrado na sua conta GitHub para que suas contribuições fiquem associadas ao seu perfil.',
+        code: 'git config --global user.name "Seu Nome Completo"\ngit config --global user.email "seu-email@exemplo.com"',
+        lang: 'bash'
+      },
+      {
+        title: 'Padronizar a branch inicial como main',
+        text: 'Defina a branch padrão de novos repositórios como "main", alinhando seu ambiente local com o padrão moderno adotado pelo GitHub e pela comunidade.',
+        code: 'git config --global init.defaultBranch main',
+        lang: 'bash'
+      },
+      {
+        title: 'Conferir e validar as configurações salvas',
+        text: 'Revise todas as configurações globais salvas no seu sistema antes de iniciar o versionamento dos projetos:',
+        code: 'git config --global --list',
+        lang: 'bash'
+      },
+      {
+        title: 'Criar ou acessar sua conta no GitHub',
+        text: 'Acesse o portal do GitHub para criar seu cadastro gratuito (caso ainda não possua) ou fazer login com suas credenciais existentes.',
+        links: [
+          { url: 'https://github.com/signup', label: 'Criar conta gratuita no GitHub' },
+          { url: 'https://github.com/login', label: 'Fazer login no GitHub' }
+        ],
+        code: 'https://github.com/',
+        lang: 'text'
+      },
+      {
+        title: 'Acessar o repositório de laboratório do curso',
+        text: 'Abra a página do repositório disponibilizado pelo professor. Localize o botão verde "Code" e observe as opções para copiar a URL de clonagem.',
+        links: [
+          { url: 'https://github.com/alesauer/tutorial-git', label: 'Repositório tutorial-git no GitHub' }
+        ],
+        code: 'https://github.com/alesauer/tutorial-git.git',
+        lang: 'text'
+      }
     ],
-    exercise: 'Acesse o repositório do curso, localize a URL HTTPS e identifique onde ficam os arquivos e o histórico.',
-    check: ['Consigo entrar no GitHub.', 'Encontrei o repositório tutorial-git.', 'Sei localizar a URL HTTPS.']
+    exercise: 'No Git Bash, configure seu user.name e user.email com seus dados reais, defina init.defaultBranch como main, execute git config --global --list para validar e acesse o repositório tutorial-git no GitHub.',
+    check: [
+      'Configurei user.name com meu nome completo.',
+      'Configurei user.email com meu e-mail do GitHub.',
+      'Defini a branch padrão como main.',
+      'O comando git config --global --list exibiu minhas informações.',
+      'Acessei minha conta no GitHub e localizei o repositório tutorial-git.'
+    ]
   },
   {
     id: 3, title: 'Primeiros passos com Git', short: 'Comandos essenciais', icon: GitCommitHorizontal, duration: '35 min',
@@ -283,7 +362,22 @@ function App() {
                     <div className="step-number">{String(index + 1).padStart(2, '0')}</div>
                     <div className="step-body">
                       <h4>{step.title}</h4>
-                      <p>{step.text}</p>
+                      <p className="step-desc">{step.text}</p>
+                      {step.links && (
+                        <div className="step-links-row">
+                          {step.links.map(link => (
+                            <a
+                              key={link.url}
+                              href={link.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="step-link-badge"
+                            >
+                              <ExternalLink size={13}/> {link.label}
+                            </a>
+                          ))}
+                        </div>
+                      )}
                       <CodeSnippet code={step.code} lang={step.lang}/>
                     </div>
                   </article>

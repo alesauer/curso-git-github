@@ -7,3 +7,5 @@
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
 
 .brand{cursor:pointer;user-select:none}.breadcrumb-btn{background:none;border:none;padding:0;color:inherit;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:color .18s}.breadcrumb-btn:hover{color:var(--green-dark);text-decoration:underline}.home-view,.lesson-view{animation:fadeIn .2s ease}@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+.step-desc{font-size:11px;color:#777d73;line-height:1.65;margin-bottom:12px;white-space:pre-line}.step-links-row{display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 12px}.step-link-badge{display:inline-flex;align-items:center;gap:6px;background:#f0f8eb;color:#2f7819;border:1px solid #d4eac9;border-radius:8px;padding:6px 11px;font-size:11px;font-weight:700;transition:all .18s ease;text-decoration:none}.step-link-badge:hover{background:#e3f3db;border-color:#badfa9;color:#1e5a0e;transform:translateY(-1px)}
