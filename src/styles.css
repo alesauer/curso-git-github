@@ -999,6 +999,34 @@ h1 span {
   transform: translateY(-1px);
 }
 
+.step-tip-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  background: #fbfdf9;
+  border: 1px solid #dcebd4;
+  border-left: 4px solid var(--green);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin: 12px 0 16px;
+  color: var(--ink-light);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.step-tip-box svg {
+  color: #df9e08;
+  flex: 0 0 19px;
+  margin-top: 2px;
+}
+
+.step-tip-box strong {
+  color: var(--ink);
+  font-weight: 700;
+  display: inline;
+  margin-right: 6px;
+}
+
 /* Code Snippet Component */
 .snippet {
   overflow: hidden;

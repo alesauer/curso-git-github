@@ -4,7 +4,7 @@ import {
   BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, ChevronsRight,
   CircleHelp, Clipboard, Clock3, Code2, Command, Download, ExternalLink, FileCode2,
   GitBranch, GitCommitHorizontal, GitFork, GitPullRequest, Github, GraduationCap,
-  Home, Menu, PanelLeftClose, PanelLeftOpen, Play, Search, Settings, Terminal, Users, X
+  Home, Lightbulb, Menu, PanelLeftClose, PanelLeftOpen, Play, Search, Settings, Terminal, Users, X
 } from 'lucide-react'
 import './styles.css'
 
@@ -31,10 +31,9 @@ const modules = [
         lang: 'text'
       },
       {
-        title: 'Executar o instalador (Opções recomendadas)',
-        text: 'Execute o arquivo baixado (Git-2.xx-64-bit.exe) e siga as telas do assistente com as seguintes opções recomendadas:\n• Select Components: Marque "Git Bash Here" e "Git GUI Here".\n• Default Editor: Selecione o Visual Studio Code (ou Nano) como editor padrão.\n• Adjusting your PATH: Escolha a opção recomendada "Git from the command line and also from 3rd-party software".\n• Terminal Emulator: Escolha "Use MinTTY (the default terminal of MSYS2)".\n• Line Ending: Mantenha "Checkout Windows-style, commit Unix-style line endings".\nAvance com Next até finalizar a instalação.',
-        code: '# Nenhuma linha de comando necessária nesta etapa.\n# Basta seguir o assistente mantendo as opções recomendadas acima.',
-        lang: 'text'
+        title: 'Executar o instalador no Windows',
+        text: 'Dê dois cliques no arquivo baixado (Git-2.xx-64-bit.exe) para abrir o assistente de instalação.\n\nFique tranquilo: O instalador do Git for Windows já vem com as melhores opções pré-selecionadas para a grande maioria dos desenvolvedores!\n\nO que você precisa fazer:\n1. Tela de Editor: Se você usa o VS Code, pode selecioná-lo na lista ("Use Visual Studio Code as Git\'s default editor"). Caso contrário, pode manter o editor padrão sugerido.\n2. Demais telas: Mantenha as opções recomendadas já marcadas pelo instalador e clique em Next em todas as etapas.\n3. Na tela final, clique em Install e aguarde a barra de progresso ser concluída.',
+        tip: 'O instalador já inclui o Git Bash automaticamente. É ele o terminal que utilizaremos para digitar todos os comandos práticos do curso!'
       },
       {
         title: 'Abrir o Git Bash e testar a instalação',
@@ -378,7 +377,16 @@ function App() {
                           ))}
                         </div>
                       )}
-                      <CodeSnippet code={step.code} lang={step.lang}/>
+                      {step.tip && (
+                        <div className="step-tip-box">
+                          <Lightbulb size={18}/>
+                          <div>
+                            <strong>Dica do Professor:</strong>
+                            <span>{step.tip}</span>
+                          </div>
+                        </div>
+                      )}
+                      {step.code && <CodeSnippet code={step.code} lang={step.lang}/>}
                     </div>
                   </article>
                 ))}
