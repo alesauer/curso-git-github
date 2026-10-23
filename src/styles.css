@@ -999,19 +999,22 @@ h1 span {
   transform: translateY(-1px);
 }
 
-.step-tip-box {
+.step-tip-box, .step-warning-box {
   display: flex;
   align-items: flex-start;
   gap: 13px;
-  background: #fbfdf9;
-  border: 1px solid #dcebd4;
-  border-left: 4px solid var(--green);
   border-radius: 12px;
   padding: 14px 18px;
   margin: 12px 0 16px;
-  color: var(--ink-light);
   font-size: 14px;
   line-height: 1.6;
+}
+
+.step-tip-box {
+  background: #fbfdf9;
+  border: 1px solid #dcebd4;
+  border-left: 4px solid var(--green);
+  color: var(--ink-light);
 }
 
 .step-tip-box svg {
@@ -1025,6 +1028,31 @@ h1 span {
   font-weight: 700;
   display: inline;
   margin-right: 6px;
+}
+
+.step-warning-box {
+  background: #fffcf5;
+  border: 1px solid #f9e2b8;
+  border-left: 4px solid #e27d14;
+  color: #5c4314;
+}
+
+.step-warning-box svg {
+  color: #d97706;
+  flex: 0 0 19px;
+  margin-top: 2px;
+}
+
+.step-warning-box strong {
+  color: #7c2d12;
+  font-weight: 700;
+  display: inline;
+  margin-right: 6px;
+}
+
+.step-tip-box div, .step-warning-box div {
+  white-space: pre-line;
+  flex: 1;
 }
 
 /* Code Snippet Component */

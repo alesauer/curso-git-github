@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import {
-  BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, ChevronsRight,
+  AlertTriangle, BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, ChevronsRight,
   CircleHelp, Clipboard, Clock3, Code2, Command, Download, ExternalLink, FileCode2,
   GitBranch, GitCommitHorizontal, GitFork, GitPullRequest, Github, GraduationCap,
   Home, Lightbulb, Menu, PanelLeftClose, PanelLeftOpen, Play, Search, Settings, Terminal, Users, X
@@ -204,55 +204,61 @@ const modules = [
   {
     id: 5,
     title: 'Comandos intermediários e avançados',
-    short: 'Histórico e recuperação',
+    short: 'Histórico, conflitos e recuperação',
     icon: GitFork,
     duration: '50 min',
-    intro: 'Aprofunde seu domínio no Git com ferramentas essenciais para o dia a dia profissional: integração com merge, resolução de conflitos, isolamento temporário com stash, reversão segura e versionamento semântico com tags.',
-    objective: 'Ao final, você saberá resolver conflitos de merge, guardar trabalho temporário sem comitar, desfazer alterações com segurança no histórico compartilhado e marcar versões de release no GitHub.',
+    intro: 'Aprofunde seu domínio no Git com ferramentas essenciais para o dia a dia profissional: integração com merge, anatomia e resolução de conflitos, isolamento temporário com stash, estratégias seguras de recuperação (restore, amend, revert), auditoria de histórico (graph, diff, blame) e versionamento semântico com tags.',
+    objective: 'Ao final, você saberá resolver conflitos de merge sem medo de perder código, guardar tarefas temporárias com o stash, recuperar arquivos e commits com segurança usando o comando certo para cada situação, e publicar versões oficiais (releases) no GitHub.',
     steps: [
       {
-        title: 'Integração de branches (git merge) e resolução de conflitos',
-        text: 'O merge combina o histórico de duas branches. Para trazer as alterações da branch dev para a branch principal, você deve primeiro se posicionar na main e executar o comando de integração:\n\nO que acontece se houver conflito?\nSe a mesma linha do mesmo arquivo tiver sido modificada na main e na dev, o Git pausará o merge e inserirá marcadores no arquivo:\n<<<<<<< HEAD (sua versão atual na main)\n=======\n>>>>>>> dev (a versão vinda da branch dev)\n\nComo resolver: Abra o arquivo, apague os marcadores, decida qual código manter, salve o arquivo, execute git add . e finalize com git commit.',
-        tip: 'No VS Code, quando ocorre um conflito de merge, o editor exibe botões automáticos logo acima do código ("Accept Current Change", "Accept Incoming Change", "Accept Both"). Isso torna a resolução muito mais intuitiva!',
-        code: '# 1. Alterna para a branch de destino (main)\ngit switch main\n\n# 2. Mescla o histórico da branch dev\ngit merge dev\n\n# 3. Caso haja conflito, após editar e salvar os arquivos:\ngit add .\ngit commit -m "merge: resolve conflitos entre main e dev"',
+        title: 'Integração de branches (git merge) e anatomia dos conflitos',
+        text: 'O merge integra o histórico de duas branches. Para trazer as alterações da branch dev para a branch principal (main), você deve sempre se posicionar na branch receptora antes de executar a mesclagem:\n1. Alternar para a branch principal: git switch main\n2. Executar a fusão: git merge dev\n\n• O que causa um conflito no Git?\nO Git é inteligente: se um desenvolvedor alterou o topo de um arquivo e outro alterou o rodapé, o Git junta tudo automaticamente sem conflito (Fast-forward ou Merge commit automático).\nUm conflito SÓ acontece quando as duas branches alteraram a MESMA linha do mesmo arquivo de maneiras diferentes desde a divisão. O Git não adivinha qual versão manter e delega essa decisão para você!\n\n• Anatomia visual dos marcadores de conflito:\nAo pausar o merge com conflito, o Git insere marcadores diretamente no arquivo de código:\n<<<<<<< HEAD (código da sua branch atual main)\n=======\n>>>>>>> dev (código vindo da branch dev)\n\n• Passo a passo para resolver sem erro:\n1. Digite git status para listar os arquivos com conflito (aparecerão como "both modified").\n2. Abra o arquivo no VS Code, apague as linhas dos marcadores (<<<<<<<, =======, >>>>>>>) e deixe apenas o código final desejado.\n3. Salve o arquivo e marque como resolvido com git add .\n4. Finalize a integração com git commit (o Git já sugere a mensagem automática de merge!).',
+        tip: 'No VS Code, quando um arquivo com conflito é aberto, o editor exibe botões mágicos no topo do bloco: "Accept Current Change" (mantém o da main), "Accept Incoming Change" (substitui pelo da dev), "Accept Both" (mantém ambos) e "Compare Changes". Clicar em um deles resolve o bloco instantaneamente!',
+        warning: '🚨 Botão de Pânico (git merge --abort):\nSe você começou a resolver conflitos, se confundiu ou percebeu que não era hora de integrar agora, NÃO SE DESESPERE! Basta executar git merge --abort no terminal.\nO Git cancela a operação imediatamente e devolve seu repositório exatamente ao estado intacto e seguro anterior ao merge!',
+        code: '# 1. Posicione-se na branch que receberá as alterações\ngit switch main\n\n# 2. Inicia o merge da branch dev\ngit merge dev\n\n# 3. Caso o terminal avise "CONFLICT", veja os arquivos afetados\ngit status\n\n# 4. Após editar os arquivos e remover os marcadores, conclua o merge:\ngit add .\ngit commit -m "merge: resolve conflitos entre main e dev"\n\n# DICA DE SEGURANÇA: Se quiser cancelar tudo e voltar atrás com segurança:\n# git merge --abort',
         lang: 'bash'
       },
       {
-        title: 'Guardar trabalho temporário com git stash (Gaveta rápida)',
-        text: 'Imagine que você começou a programar na branch dev, seus arquivos estão incompletos e quebram a aplicação, mas você precisa urgentemente mudar para a main para verificar outro problema.\n\nVocê não pode comitar código quebrado! A solução é o git stash: ele funciona como uma "gaveta" que guarda suas modificações não comitadas e deixa a pasta de trabalho 100% limpa.',
-        tip: 'O stash é ideal para trocas rápidas de contexto no mesmo dia. Evite acumular muitos stashes antigos por semanas, pois você pode se esquecer do que estava guardado.',
-        code: '# 1. Guarda as alterações não comitadas na gaveta do stash\ngit stash -u\n\n# 2. Lista todos os itens guardados no stash\ngit stash list\n\n# 3. Alterne entre branches livremente\ngit switch main\n\n# 4. Ao voltar para a dev, recupere seu trabalho e limpe a gaveta\ngit switch dev\ngit stash pop',
+        title: 'Guardar trabalho temporário com git stash (A gaveta do desenvolvedor)',
+        text: 'Cenário comum no dia a dia:\nVocê está programando uma funcionalidade na branch dev, seus arquivos ainda estão incompletos e cheios de erros temporários (código quebrado), e de repente surge um chamado urgente para verificar um bug na branch main.\n\nO Git NÃO permite alternar de branch se suas alterações locais colidirem com os arquivos da outra branch, e você NÃO deve comitar código quebrado!\n\nA solução perfeita é o git stash: ele funciona como uma gaveta rápida e segura. Ele "guarda" temporariamente todas as suas modificações não comitadas e deixa seu diretório de trabalho 100% limpo para alternar de branch livremente.\n\n• Comandos essenciais da gaveta de stash:\n• git stash push -u -m "descricao": Guarda as alterações incluindo novos arquivos criados (-u) com uma mensagem descritiva.\n• git stash list: Lista todas as gavetas salvas no histórico (stash@{0}, stash@{1}, etc.).\n• git stash show -p: Inspeciona em detalhes o código guardado antes de aplicá-lo.\n• git stash pop: Restaura as alterações no código e REMOVE o registro da gaveta (mais utilizado).\n• git stash apply: Restaura as alterações, mas MANTÉM uma cópia na gaveta (útil para testar o mesmo código em mais de uma branch).',
+        tip: 'Se você aplicar o stash e houver conflito de código com a branch atual, execute:\ngit stash branch nome-da-nova-branch\nO Git criará automaticamente uma branch nova a partir do commit original e aplicará o conteúdo guardado nela sem conflitar!',
+        warning: 'Limpeza da gaveta:\nO stash foi projetado para pausas rápidas (horas ou no mesmo dia). Evite deixar stashes acumulados por semanas, pois você pode se esquecer do que estava guardado.\n• Para descartar um stash específico: git stash drop stash@{0}\n• Para limpar todos os stashes de uma vez: git stash clear',
+        code: '# 1. Guarda tudo na gaveta temporária (-u inclui novos arquivos criados)\ngit stash push -u -m "wip: implementação parcial do formulário"\n\n# 2. Seu ambiente agora está limpo! Mude de branch e resolva a urgência\ngit switch main\n# ... faz a verificação necessária na main ...\n\n# 3. Retorne para a dev e recupere seu trabalho de onde parou\ngit switch dev\ngit stash pop\n\n# 4. Caso queira listar os itens guardados no stash:\ngit stash list',
         lang: 'bash'
       },
       {
-        title: 'Desfazer alterações com segurança (restore vs revert)',
-        text: 'Saber desfazer alterações sem perder trabalho é uma das habilidades mais importantes do Git:\n\n1. git restore: Descarta alterações locais em arquivos que ainda NÃO foram comitados.\n2. git restore --staged: Remove arquivos da área de preparação (staging) sem apagar seu código.\n3. git revert: É a forma recomendada e segura de desfazer um commit já enviado ao GitHub. Ele cria um NOVO commit com o efeito oposto, mantendo a integridade do histórico compartilhado.',
-        tip: 'CUIDADO com o git reset --hard! O comando reset reescreve o histórico local e pode apagar alterações de forma irreversível. Em repositórios compartilhados com a equipe, sempre prefira o git revert.',
-        code: '# Desfaz alterações locais não salvas em um arquivo\ngit restore index.html\n\n# Remove um arquivo da área de stage (unstage)\ngit restore --staged index.html\n\n# Desfaz um commit específico de forma segura criando um novo commit\ngit revert <hash-do-commit>',
+        title: 'Guia de Sobrevivência: Desfazer alterações com segurança (restore, amend e revert)',
+        text: 'Saber desfazer alterações sem perder seu código é fundamental. O Git moderno possui comandos cirúrgicos para cada estágio do arquivo:\n\n1. Arquivo modificado no computador (antes do git add):\nSe você testou um trecho de código que não funcionou e quer descartar as alterações locais, voltando ao estado do último commit:\ngit restore nome-do-arquivo.ext\n\n2. Arquivo colocado no stage por engano (depois do git add):\nSe você executou git add em um arquivo com senhas ou incompleto e quer tirá-lo do palco sem apagar o que escreveu:\ngit restore --staged nome-do-arquivo.ext\n\n3. Errou a mensagem do último commit local (git commit --amend):\nCometeu um erro de digitação na mensagem do commit ou esqueceu de incluir um arquivo? Você pode "emendar" o commit mais recente sem criar um segundo commit feio:\ngit commit --amend -m "feat: mensagem corrigida"\n\n4. O commit já foi enviado ao GitHub (git revert):\nSe um commit com bug já foi compartilhado no GitHub remoto, você NÃO deve reescrever o passado. O comando git revert cria um NOVO commit com o efeito oposto, mantendo a história da equipe intacta e transparente.',
+        tip: 'Para reverter um commit enviado ao GitHub:\n1. Veja o histórico recente com git log --oneline -n 5\n2. Copie os primeiros 7 caracteres do hash do commit com defeito (ex: 8f3c1a2)\n3. Execute git revert 8f3c1a2. O Git criará um commit com o título "Revert ..." de forma limpa. Envie com git push origin main!',
+        warning: '⚠️ CUIDADO MÁXIMO COM git reset --hard!\nMuitos tutoriais na internet sugerem `git reset --hard HEAD~1` para apagar commits. O comando reset --hard é DESTRUTIVO: ele reescreve a história e apaga o código do seu disco sem pedir confirmação.\nRegra profissional: Em branches compartilhadas (como main), NUNCA use git reset --hard. Prefira sempre git revert!',
+        code: '# CENÁRIO 1: Descarta alterações locais não salvas em um arquivo\ngit restore index.html\n\n# CENÁRIO 2: Tira um arquivo da área de stage (unstage) sem apagar o código\ngit restore --staged .env\n\n# CENÁRIO 3: Emenda arquivos esquecidos ou altera a mensagem do último commit local\ngit add arquivo-esquecido.txt\ngit commit --amend -m "feat: adiciona componente com validação de campos"\n\n# CENÁRIO 4: Reverte de forma segura um commit já enviado ao GitHub remoto\ngit log --oneline -n 3\ngit revert <hash-do-commit>\ngit push origin main',
         lang: 'bash'
       },
       {
-        title: 'Investigação do histórico em árvore (git log avançado)',
-        text: 'Conforme seu projeto ganha novos commits e branches, o comando git log tradicional se torna longo e difícil de acompanhar. Com os parâmetros corretos, você transforma o terminal em um grafo visual interativo:',
-        tip: 'Você pode criar um "atalho" (alias) no Git para esse comando não precisar ser digitado toda vez: execute git config --global alias.grafo "log --oneline --graph --all" e depois basta digitar git grafo!',
-        code: '# Visualiza o histórico resumido com desenho das branches (grafo)\ngit log --oneline --graph --all\n\n# Filtra o histórico de alterações de um arquivo específico\ngit log -p README.md\n\n# Filtra commits por autor\ngit log --author="Seu Nome" --oneline',
+        title: 'Auditoria do Histórico: git log em árvore, diff e blame',
+        text: 'Em equipes profissionais, conseguir investigar o que aconteceu no repositório é uma das habilidades mais valorizadas.\n\n• Desenho da árvore de branches no terminal:\nO comando tradicional git log exibe páginas longas de texto. Com os parâmetros --oneline --graph --all, o Git desenha as ramificações e convergências das branches como um grafo colorido direto no terminal, mostrando onde cada branch está apontando.\n\n• Comparação de código com git diff:\n• git diff: Exibe linha por linha o que você alterou nos arquivos locais que ainda NÃO foram adicionados com git add.\n• git diff --staged: Exibe o que já foi preparado na staging area pronto para virar commit.\n\n• Investigação por linha com git blame:\nO comando git blame arquivo.ext lista cada linha do arquivo ao lado do nome do autor que a escreveu, data e hash do commit. É fundamental para entender o contexto histórico de por que uma regra foi implementada.',
+        tip: 'Crie atalhos (aliases) personalizados no Git Bash para economizar tempo todos os dias!\nExecute no terminal:\ngit config --global alias.grafo "log --oneline --graph --all"\ngit config --global alias.s "status -s"\ngit config --global alias.d "diff"\nAgora você só precisa digitar `git grafo` para ver o mapa visual e `git s` para um status limpo e resumido!',
+        warning: 'Cultura do git blame:\nO termo "blame" significa culpar em inglês, mas no dia a dia profissional ele NUNCA deve ser usado para apontar dedos! Ele serve para encontrar quem tem mais conhecimento sobre uma regra de negócio complexa para tirar dúvidas de forma colaborativa.',
+        code: '# 1. Visualiza a árvore completa de branches e merges no terminal\ngit log --oneline --graph --all\n\n# 2. Compara as alterações do seu código local com o último commit\ngit diff\n\n# 3. Compara o que já está na área de preparação (staged)\ngit diff --staged\n\n# 4. Descobre quem escreveu e quando cada linha de um arquivo foi alterada\ngit blame README.md\n\n# 5. Configura o atalho definitivo "git grafo" para seu Git global\ngit config --global alias.grafo "log --oneline --graph --all"',
         lang: 'bash'
       },
       {
-        title: 'Marcar lançamentos de versão com git tag e Releases',
-        text: 'Tags são marcadores fixos no tempo que identificam marcos importantes do projeto (como v1.0.0, v1.2.0, v2.0.0), seguindo o Versionamento Semântico (SemVer: MAJOR.MINOR.PATCH).\n\nDiferente das branches, que se movem a cada novo commit, uma tag fica para sempre apontada para aquele commit específico.',
-        tip: 'Ao enviar tags anotadas para o GitHub, elas aparecem automaticamente na aba "Releases" do repositório, permitindo que qualquer usuário faça download do código empacotado daquela versão!',
-        code: '# Cria uma tag anotada com mensagem de versão\ngit tag -a v1.0.0 -m "Release: Primeira versão estável do projeto"\n\n# Lista as tags existentes no repositório\ngit tag\n\n# Publica a tag no GitHub\ngit push origin v1.0.0\n\n# Para enviar todas as tags de uma só vez:\ngit push origin --tags',
+        title: 'Versionamento Semântico (SemVer) e Tags de Release no GitHub',
+        text: 'Enquanto branches estão sempre em movimento com novos commits, as Tags são marcadores fixos e imutáveis no tempo. Elas marcam momentos históricos oficiais do seu projeto, como o lançamento de uma nova versão (ex: v1.0.0, v1.1.0, v2.0.0).\n\n• O que é Versionamento Semântico (SemVer)?\nO padrão mundial da indústria adota o formato MAJOR.MINOR.PATCH (ex: v1.2.3):\n• MAJOR (1.0.0 → 2.0.0): Mudança que quebra compatibilidade com versões anteriores (breaking changes).\n• MINOR (1.0.0 → 1.1.0): Novas funcionalidades adicionadas de forma 100% retrocompatível.\n• PATCH (1.0.0 → 1.0.1): Correções pontuais de defeitos (bug fixes) sem novos recursos.\n\n• Tipos de Tags no Git:\n• Tag leve: Apenas um apelido para um commit (ex: git tag v1.0.0).\n• Tag anotada (Recomendada): Salva como um objeto completo no Git, guardando nome do autor, e-mail, data e mensagem de release (ex: git tag -a v1.0.0 -m "mensagem").\n\n• Publicação de Releases no GitHub:\nTags não são enviadas ao remoto com o git push comum. Elas precisam ser enviadas explicitamente com git push origin v1.0.0 ou git push origin --tags.\nNo GitHub, as tags aparecem na aba "Releases", permitindo que qualquer pessoa baixe o código-fonte empacotado em .zip daquela versão estável.',
+        tip: 'Após enviar sua tag para o GitHub:\n1. Acesse seu repositório no navegador e clique em "Releases" na barra lateral direita.\n2. Clique em "Draft a new release" e escolha a tag v1.0.0.\n3. Clique no botão "Generate release notes": o GitHub analisará todos os Pull Requests e commits desde a versão anterior e criará o texto de lançamento automaticamente!',
+        warning: 'Como apagar uma tag criada por engano:\nSe você criou uma tag com o nome errado ou no commit incorreto:\n• Para excluir localmente no seu computador: git tag -d v1.0.0\n• Para excluir no GitHub remoto: git push origin --delete v1.0.0',
+        code: '# 1. Cria uma tag anotada de versão oficial com mensagem descritiva\ngit tag -a v1.0.0 -m "Release v1.0.0: Primeira versão estável do projeto"\n\n# 2. Lista todas as tags existentes no repositório\ngit tag\n\n# 3. Exibe os metadados completos da tag (autor, data, mensagem e commit)\ngit show v1.0.0\n\n# 4. Envia a tag para o GitHub (cria a Release remota)\ngit push origin v1.0.0\n\n# 5. Para enviar todas as tags locais pendentes de uma só vez:\ngit push origin --tags',
         lang: 'bash'
       }
     ],
-    exercise: 'Pratique o fluxo avançado: 1. Na branch main, crie a tag v1.0.0 e confira com git tag. 2. Na branch dev, faça uma alteração, guarde com git stash, confira com git stash list e recupere com git stash pop. 3. Conclua o commit, volte para a main e realize o git merge dev. 4. Visualize a árvore completa com git log --oneline --graph --all.',
+    exercise: 'Coloque em prática o fluxo avançado: 1. Na branch main, crie a tag anotada v1.0.0 e envie com git push origin v1.0.0. 2. Na branch dev, faça uma alteração temporária em um arquivo, guarde na gaveta com git stash push -u -m "wip-teste", confira com git stash list e recupere com git stash pop. 3. Conclua o commit, volte para a main e realize o git merge dev (se surgir conflito, resolva ou pratique o git merge --abort para ver o cancelamento seguro). 4. Crie o alias git grafo e visualize sua árvore de commits completa.',
     check: [
-      'Entendo como funciona o git merge e sei identificar e resolver marcadores de conflito.',
-      'Sei utilizar o git stash para guardar alterações temporárias ao trocar de branch.',
-      'Compreendo a diferença entre git restore (descarte local) e git revert (novo commit de reversão).',
-      'Consigo visualizar o grafo de branches com git log --oneline --graph --all.',
-      'Sei criar tags anotadas de versão (git tag -a) e publicá-las no GitHub.'
+      'Compreendo a causa dos conflitos de merge e sei ler e resolver os marcadores <<<<<<< HEAD e >>>>>>> dev.',
+      'Conheço o botão de segurança git merge --abort para cancelar merges conflitantes sem perder dados.',
+      'Domino o git stash (-u, list, pop e apply) para guardar trabalho temporário ao trocar de contexto.',
+      'Sei quando usar git restore (descarte local), git commit --amend e git revert (reversão pública segura).',
+      'Criei o alias de grafo no Git e sei inspecionar alterações com git diff e git blame.',
+      'Entendo o Versionamento Semântico (SemVer) e publiquei uma tag anotada com git push origin v1.0.0.'
     ]
   },
   {
@@ -487,6 +493,15 @@ function App() {
                           <div>
                             <strong>Dica do Professor:</strong>
                             <span>{step.tip}</span>
+                          </div>
+                        </div>
+                      )}
+                      {step.warning && (
+                        <div className="step-warning-box">
+                          <AlertTriangle size={18}/>
+                          <div>
+                            <strong>Atenção / Segurança:</strong>
+                            <span>{step.warning}</span>
                           </div>
                         </div>
                       )}
