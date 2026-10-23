@@ -509,10 +509,22 @@ function ConceptsPage({ onStartCourse, onBackHome }) {
               </div>
             </div>
             <ul className="compare-list">
-              <li><CheckCircle2 size={16}/> <strong>O que é:</strong> Um software de controle de versões distribuído de código aberto, criado por Linus Torvalds em 2005.</li>
-              <li><CheckCircle2 size={16}/> <strong>Onde executa:</strong> Localmente no seu computador, via terminal (Git Bash, Prompt, PowerShell) ou extensões de editores.</li>
-              <li><CheckCircle2 size={16}/> <strong>Independência:</strong> Funciona 100% offline. Você não precisa de conexão com a internet para criar commits, branches ou inspecionar histórico.</li>
-              <li><CheckCircle2 size={16}/> <strong>Responsabilidade:</strong> Gravar o histórico de alterações arquivo a arquivo, permitindo voltar no tempo a qualquer momento.</li>
+              <li>
+                <CheckCircle2 size={16}/>
+                <span><strong>O que é:</strong> Um software de controle de versões distribuído de código aberto, criado por Linus Torvalds em 2005.</span>
+              </li>
+              <li>
+                <CheckCircle2 size={16}/>
+                <span><strong>Onde executa:</strong> Localmente no seu computador, via terminal (Git Bash, Prompt, PowerShell) ou extensões de editores.</span>
+              </li>
+              <li>
+                <CheckCircle2 size={16}/>
+                <span><strong>Independência:</strong> Funciona 100% offline. Você não precisa de conexão com a internet para criar commits, branches ou inspecionar histórico.</span>
+              </li>
+              <li>
+                <CheckCircle2 size={16}/>
+                <span><strong>Responsabilidade:</strong> Gravar o histórico de alterações arquivo a arquivo, permitindo voltar no tempo a qualquer momento.</span>
+              </li>
             </ul>
           </div>
 
@@ -525,10 +537,22 @@ function ConceptsPage({ onStartCourse, onBackHome }) {
               </div>
             </div>
             <ul className="compare-list">
-              <li><CheckCircle2 size={16}/> <strong>O que é:</strong> Um serviço web na nuvem (da Microsoft) que hospeda repositórios Git remotos e ferramentas de colaboração.</li>
-              <li><CheckCircle2 size={16}/> <strong>Onde executa:</strong> Nos servidores da nuvem, acessado pelo navegador ou ferramentas gráficas.</li>
-              <li><CheckCircle2 size={16}/> <strong>Conexão:</strong> Exige internet para sincronizar seu trabalho local com a equipe através de envio (push) e recebimento (pull).</li>
-              <li><CheckCircle2 size={16}/> <strong>Responsabilidade:</strong> Trabalho em equipe, revisão de código (Pull Requests), automações (CI/CD), rastreamento de problemas (Issues) e portfólio.</li>
+              <li>
+                <CheckCircle2 size={16}/>
+                <span><strong>O que é:</strong> Um serviço web na nuvem (da Microsoft) que hospeda repositórios Git remotos e ferramentas de colaboração.</span>
+              </li>
+              <li>
+                <CheckCircle2 size={16}/>
+                <span><strong>Onde executa:</strong> Nos servidores da nuvem, acessado pelo navegador ou ferramentas gráficas.</span>
+              </li>
+              <li>
+                <CheckCircle2 size={16}/>
+                <span><strong>Conexão:</strong> Exige internet para sincronizar seu trabalho local com a equipe através de envio (push) e recebimento (pull).</span>
+              </li>
+              <li>
+                <CheckCircle2 size={16}/>
+                <span><strong>Responsabilidade:</strong> Trabalho em equipe, revisão de código (Pull Requests), automações (CI/CD), rastreamento de problemas (Issues) e portfólio.</span>
+              </li>
             </ul>
           </div>
         </div>

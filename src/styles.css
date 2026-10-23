@@ -1468,7 +1468,7 @@ h1 span {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: 13px;
 }
 
 .compare-list li {
@@ -1477,13 +1477,26 @@ h1 span {
   color: var(--ink-light);
   display: flex;
   align-items: flex-start;
-  gap: 9px;
+  gap: 10px;
 }
 
 .compare-list li svg {
   color: var(--green);
   flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
   margin-top: 3px;
+}
+
+.compare-list li span {
+  flex: 1;
+  min-width: 0;
+}
+
+.compare-list li strong {
+  color: var(--ink);
+  font-weight: 700;
+  margin-right: 2px;
 }
 
 .analogy-banner {
