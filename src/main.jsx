@@ -4,7 +4,7 @@ import {
   BookOpen, Check, CheckCircle2, ChevronLeft, ChevronRight, ChevronsRight,
   CircleHelp, Clipboard, Clock3, Code2, Command, ExternalLink, FileCode2,
   GitBranch, GitCommitHorizontal, GitFork, GitPullRequest, Github, GraduationCap,
-  Menu, PanelRightClose, PanelRightOpen, Play, Search, Terminal, Users, X
+  Menu, PanelLeftClose, PanelLeftOpen, Play, Search, Terminal, Users, X
 } from 'lucide-react'
 import './styles.css'
 
@@ -86,7 +86,7 @@ const modules = [
     check: ['Abri o repositório no VS Code.', 'Revisei um diff.', 'Fiz stage e commit pela interface.', 'Localizei a opção de branch.']
   },
   {
-    id: 7, title: 'GitHub Desktop', short: 'Git com interface gráfica', icon: PanelRightOpen, duration: '20 min',
+    id: 7, title: 'GitHub Desktop', short: 'Git com interface gráfica', icon: PanelLeftOpen, duration: '20 min',
     intro: 'Conheça uma alternativa gráfica para clonar repositórios, revisar alterações e sincronizar commits.',
     objective: 'Ao final, você conseguirá executar o fluxo básico de versionamento pelo GitHub Desktop.',
     steps: [
@@ -143,6 +143,48 @@ function App() {
     </header>
 
     <div className="layout">
+      <aside className={`sidebar ${mobileMenu ? 'mobile-open' : ''}`} aria-label="Navegação do curso">
+        <div className="sidebar-head">
+          <div><span className="sidebar-label">CONTEÚDO DO CURSO</span><h2>Trilha de aprendizagem</h2></div>
+          <button className="collapse-btn" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label={sidebarOpen ? 'Recolher menu' : 'Expandir menu'}>
+            {sidebarOpen ? <PanelLeftClose size={18}/> : <PanelLeftOpen size={18}/>}
+          </button>
+        </div>
+        <div className="progress-box">
+          <div className="progress-label"><span>Seu progresso</span><strong>{progress}%</strong></div>
+          <div className="progress-track"><div className="progress-fill" style={{ width: `${progress}%` }}/></div>
+          <span className="progress-caption">{completedCount} de {modules.length} módulos concluídos</span>
+        </div>
+        <nav className="module-nav">
+          {modules.map(module => {
+            const Icon = module.icon;
+            const isActive = module.id === activeId;
+            return <button key={module.id} className={`module-link ${isActive ? 'active' : ''}`} onClick={() => selectModule(module.id)} title={module.title}>
+              <span className="module-icon"><Icon size={18}/></span>
+              <span className="module-text"><strong>{String(module.id).padStart(2, '0')} · {module.title}</strong><small>{module.short}</small></span>
+              <span className="module-state">{completed[module.id] ? <CheckCircle2 size={17}/> : isActive ? <span className="active-dot"/> : <span className="module-empty"/>}</span>
+            </button>
+          })}
+        </nav>
+        <div className="sidebar-bottom">
+          <div className="help-icon"><CircleHelp size={18}/></div>
+          <div className="help-copy"><strong>Precisa de ajuda?</strong><span>Consulte a documentação oficial.</span><a href="https://git-scm.com/doc" target="_blank" rel="noreferrer">Documentação Git <ExternalLink size={12}/></a></div>
+        </div>
+        <a className="github-card" href={repoUrl} target="_blank" rel="noreferrer">
+          <Github size={20}/>
+          <span><strong>Repositório de laboratório</strong><small>alesauer/tutorial-git</small></span>
+          <ExternalLink size={14}/>
+        </a>
+      </aside>
+
+      {!sidebarOpen && (
+        <button className="expand-floating" onClick={() => setSidebarOpen(true)} aria-label="Expandir navegação">
+          <ChevronsRight size={19}/><span>Conteúdo</span>
+        </button>
+      )}
+
+      {mobileMenu && <button className="mobile-backdrop" aria-label="Fechar menu" onClick={() => setMobileMenu(false)}/>}
+
       <main className="main-content">
         <div className="breadcrumb"><span>Curso</span><ChevronRight size={14}/><span>{`Módulo ${activeId}`}</span><ChevronRight size={14}/><strong>{activeModule.title}</strong></div>
         <section className="welcome-card">
@@ -168,16 +210,6 @@ function App() {
         <div className="lesson-footer"><button className="secondary-btn" disabled={activeId === 1} onClick={() => selectModule(activeId - 1)}><ChevronLeft size={16}/> Módulo anterior</button><button className={`complete-btn ${completed[activeId] ? 'is-complete' : ''}`} onClick={markComplete}>{completed[activeId] ? <CheckCircle2 size={17}/> : <Check size={17}/>} {completed[activeId] ? 'Etapa concluída' : 'Marcar como concluída'}</button><button className="primary-btn next-btn" disabled={activeId === modules.length} onClick={() => selectModule(activeId + 1)}>Próximo módulo <ChevronRight size={16}/></button></div>
         <footer className="footer"><span>Curso Git / GitHub do Prof. S@uer</span><span>Aprender · Praticar · Colaborar</span></footer>
       </main>
-
-      <aside className={`sidebar ${mobileMenu ? 'mobile-open' : ''}`} aria-label="Navegação do curso">
-        <div className="sidebar-head"><div><span className="sidebar-label">CONTEÚDO DO CURSO</span><h2>Trilha de aprendizagem</h2></div><button className="collapse-btn" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label={sidebarOpen ? 'Recolher menu' : 'Expandir menu'}>{sidebarOpen ? <PanelRightClose size={18}/> : <PanelRightOpen size={18}/>}</button></div>
-        <div className="progress-box"><div className="progress-label"><span>Seu progresso</span><strong>{progress}%</strong></div><div className="progress-track"><div className="progress-fill" style={{ width: `${progress}%` }}/></div><span className="progress-caption">{completedCount} de {modules.length} módulos concluídos</span></div>
-        <nav className="module-nav">{modules.map(module => { const Icon = module.icon; const isActive = module.id === activeId; return <button key={module.id} className={`module-link ${isActive ? 'active' : ''}`} onClick={() => selectModule(module.id)} title={module.title}><span className="module-icon"><Icon size={18}/></span><span className="module-text"><strong>{String(module.id).padStart(2, '0')} · {module.title}</strong><small>{module.short}</small></span><span className="module-state">{completed[module.id] ? <CheckCircle2 size={17}/> : isActive ? <span className="active-dot"/> : <span className="module-empty"/>}</span></button> })}</nav>
-        <div className="sidebar-bottom"><div className="help-icon"><CircleHelp size={18}/></div><div className="help-copy"><strong>Precisa de ajuda?</strong><span>Consulte a documentação oficial.</span><a href="https://git-scm.com/doc" target="_blank" rel="noreferrer">Documentação Git <ExternalLink size={12}/></a></div></div>
-        <a className="github-card" href={repoUrl} target="_blank" rel="noreferrer"><Github size={20}/><span><strong>Repositório de laboratório</strong><small>alesauer/tutorial-git</small></span><ExternalLink size={14}/></a>
-      </aside>
-      {!sidebarOpen && <button className="expand-floating" onClick={() => setSidebarOpen(true)} aria-label="Expandir navegação"><ChevronsRight size={19}/><span>Conteúdo</span></button>}
-      {mobileMenu && <button className="mobile-backdrop" aria-label="Fechar menu" onClick={() => setMobileMenu(false)}/>}
     </div>
   </div>
 }

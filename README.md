@@ -1,6 +1,6 @@
 # Curso Git / GitHub do Prof. S@uer
 
-Página de curso feita com React + Vite, em português, com navegação lateral recolhível à direita, módulos didáticos, snippets de código copiáveis, checklist de aprendizagem e acompanhamento de progresso local.
+Página de curso feita com React + Vite, em português, com navegação lateral recolhível à esquerda, módulos didáticos, snippets de código copiáveis, checklist de aprendizagem e acompanhamento de progresso local.
 
 ## Requisitos
 - Node.js compatível com a versão atual do Vite (consulte https://vite.dev/guide/)
