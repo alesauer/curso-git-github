@@ -114,17 +114,54 @@ const modules = [
     ]
   },
   {
-    id: 3, title: 'Primeiros passos com Git', short: 'Comandos essenciais', icon: GitCommitHorizontal, duration: '35 min',
-    intro: 'Aprenda o ciclo básico de trabalho: obter o projeto, alterar arquivos, preparar mudanças, registrar versões e sincronizar com o GitHub.',
-    objective: 'Ao final, você conseguirá realizar o fluxo status → add → commit → push e atualizar sua cópia com pull.',
+    id: 3,
+    title: 'Primeiros passos com Git',
+    short: 'Comandos essenciais',
+    icon: GitCommitHorizontal,
+    duration: '40 min',
+    intro: 'Aprenda o ciclo fundamental de desenvolvimento: definir sua pasta de trabalho, obter o projeto, inspecionar mudanças, registrar versões e sincronizar com o GitHub.',
+    objective: 'Ao final, você terá criado a pasta c:\\dev\\primeiroprojeto, clonado o repositório e realizado o fluxo completo status → add → commit → push e pull.',
     steps: [
-      { title: 'Clone o repositório', text: 'O clone cria uma cópia local e configura a conexão com o repositório remoto.', code: 'git clone https://github.com/alesauer/tutorial-git.git\ncd tutorial-git', lang: 'bash' },
-      { title: 'Confira o estado e as diferenças', text: 'Use status para ver arquivos alterados e diff para inspecionar mudanças ainda não preparadas.', code: 'git status\ngit diff', lang: 'bash' },
-      { title: 'Prepare e registre uma alteração', text: 'Edite um arquivo de exercício. Depois, prepare-o e crie um commit com uma mensagem objetiva.', code: 'git add README.md\ngit commit -m "Atualiza README"', lang: 'bash' },
-      { title: 'Sincronize com o GitHub', text: 'Envie seus commits ao remoto. Para trazer atualizações remotas, use pull.', code: 'git push\ngit pull', lang: 'bash' }
+      {
+        title: 'Definir e acessar a pasta do projeto (c:\\dev\\primeiroprojeto)',
+        text: 'Antes de clonar ou versionar qualquer código, organize seu computador definindo uma pasta específica para o projeto. Recomendamos criar a pasta c:\\dev\\primeiroprojeto.\n\nNo Git Bash, o disco C: do Windows é referenciado como /c/. Execute os comandos abaixo para criar e entrar no seu diretório de trabalho:',
+        tip: 'Criar uma pasta centralizada como c:\\dev\\primeiroprojeto evita que seus repositórios fiquem soltos no Desktop ou na pasta Downloads!',
+        code: '# 1. Cria a pasta c:\\dev\\primeiroprojeto (o parâmetro -p cria subpastas automaticamente)\nmkdir -p /c/dev/primeiroprojeto\n\n# 2. Acessa a pasta recém-criada no terminal\ncd /c/dev/primeiroprojeto\n\n# 3. Confirma o caminho onde você está posicionado\npwd',
+        lang: 'bash'
+      },
+      {
+        title: 'Clonar o repositório dentro da pasta do projeto',
+        text: 'Com o terminal posicionado em c:\\dev\\primeiroprojeto, faça o clone do repositório de laboratório. O Git criará a pasta tutorial-git contendo todos os arquivos e o histórico de commits do curso:',
+        code: '# 1. Clona o repositório do curso para a pasta atual\ngit clone https://github.com/alesauer/tutorial-git.git\n\n# 2. Entra na pasta do repositório clonado\ncd tutorial-git\n\n# 3. Lista os arquivos do projeto\nls -la',
+        lang: 'bash'
+      },
+      {
+        title: 'Consultar o estado e as diferenças (status e diff)',
+        text: 'O comando git status é o seu melhor amigo: use-o para verificar em qual branch você está e quais arquivos foram modificados. Com o git diff, você compara exatamente as linhas alteradas antes de preparar a versão:',
+        code: '# Verifica a branch atual e o estado dos arquivos\ngit status\n\n# Compara as diferenças entre o código atual e o último commit\ngit diff',
+        lang: 'bash'
+      },
+      {
+        title: 'Preparar e registrar uma alteração (add e commit)',
+        text: 'Edite um arquivo de exercício (ou crie um novo). Use o comando git add para colocar a mudança na área de preparação (staging) e registre um commit com uma mensagem descritiva:',
+        code: '# Prepara o arquivo alterado para o commit (ou use git add . para todos)\ngit add README.md\n\n# Registra a versão com uma mensagem clara sobre o que foi feito\ngit commit -m "docs: atualiza README do projeto"\n\n# Confere os últimos commits registrados no histórico local\ngit log --oneline -n 3',
+        lang: 'bash'
+      },
+      {
+        title: 'Sincronizar com o GitHub (push e pull)',
+        text: 'Envie seus commits locais para o repositório remoto no GitHub usando push. Para baixar atualizações feitas por colegas de equipe, utilize o comando pull:',
+        code: '# Envia seus commits para a branch correspondente no GitHub\ngit push\n\n# Puxa e mescla as alterações mais recentes do remoto para o seu computador\ngit pull',
+        lang: 'bash'
+      }
     ],
-    exercise: 'Clone o repositório, crie um arquivo chamado meu-primeiro-commit.txt, registre um commit e confira o histórico com git log --oneline. Não envie alterações diretamente para a branch principal compartilhada sem autorização do professor.',
-    check: ['Clonei o repositório.', 'Entendo a diferença entre add e commit.', 'Consigo consultar o histórico.', 'Entendo a diferença entre commit e push.']
+    exercise: 'Crie e acesse a pasta c:\\dev\\primeiroprojeto no Git Bash. Dentro dela, clone o repositório tutorial-git, crie um arquivo chamado meu-primeiro-commit.txt, faça o git add, registre seu git commit e confira o histórico com git log --oneline.',
+    check: [
+      'Criei e acessei a pasta c:\\dev\\primeiroprojeto no terminal.',
+      'Clonei o repositório tutorial-git dentro da pasta do projeto.',
+      'Compreendi a diferença entre git add (área de preparação) e git commit (registro permanente).',
+      'Consultei o histórico com git log --oneline.',
+      'Entendi o papel do git push (enviar) e git pull (receber) na sincronização com o GitHub.'
+    ]
   },
   {
     id: 4, title: 'Branches e Pull Requests', short: 'Colaborar com segurança', icon: GitPullRequest, duration: '40 min',
