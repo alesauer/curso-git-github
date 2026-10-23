@@ -149,8 +149,9 @@ const modules = [
       },
       {
         title: 'Sincronizar com o GitHub (push e pull)',
-        text: 'Envie seus commits locais para o repositório remoto no GitHub usando push. Para baixar atualizações feitas por colegas de equipe, utilize o comando pull:',
-        code: '# Envia seus commits para a branch correspondente no GitHub\ngit push\n\n# Puxa e mescla as alterações mais recentes do remoto para o seu computador\ngit pull',
+        text: 'Envie seus commits locais para o repositório remoto no GitHub usando push. Para baixar atualizações feitas por outros colaboradores, utilize o comando pull:\n\nAo executar o primeiro git push no seu computador, o Git Credential Manager abrirá automaticamente uma janela no seu navegador solicitando a autorização ("Sign in with your browser"). Basta confirmar uma única vez!',
+        tip: 'Suas credenciais ficam gravadas com segurança no Gerenciador de Credenciais do Windows. Você não precisará digitar senhas nos próximos envios deste computador.',
+        code: '# Envia seus commits para o GitHub (na 1ª vez abrirá o login no navegador)\ngit push\n\n# Puxa e aplica atualizações mais recentes do repositório remoto\ngit pull',
         lang: 'bash'
       }
     ],
@@ -164,16 +165,41 @@ const modules = [
     ]
   },
   {
-    id: 4, title: 'Branches e Pull Requests', short: 'Colaborar com segurança', icon: GitPullRequest, duration: '40 min',
-    intro: 'Trabalhe em uma alteração isolada e proponha sua integração ao projeto por meio de um Pull Request (PR).',
-    objective: 'Ao final, você terá criado uma branch, enviado commits e participado de uma revisão de código.',
+    id: 4,
+    title: 'Branches e Pull Requests',
+    short: 'Colaborar com segurança',
+    icon: GitPullRequest,
+    duration: '40 min',
+    intro: 'Trabalhe em uma linha de desenvolvimento isolada (branch dev) e proponha a integração das suas alterações à branch principal (main) por meio de um Pull Request no GitHub.',
+    objective: 'Ao final, você terá criado a branch dev, enviado commits para ela e aberto um Pull Request para revisão de código.',
     steps: [
-      { title: 'Crie uma branch de trabalho', text: 'Use um nome curto que indique a tarefa. Evite desenvolver diretamente na branch principal.', code: 'git switch -c docs/adiciona-apresentacao', lang: 'bash' },
-      { title: 'Registre e envie a alteração', text: 'Faça uma mudança pequena, crie um commit e publique a branch no GitHub.', code: 'git add .\ngit commit -m "Adiciona apresentação do projeto"\ngit push -u origin docs/adiciona-apresentacao', lang: 'bash' },
-      { title: 'Abra um Pull Request', text: 'No GitHub, compare sua branch com a branch de destino. Explique o que mudou e peça revisão a um colega.', code: 'Título: Adiciona apresentação do projeto\nDescrição: Resume a mudança e como foi verificada.', lang: 'text' }
+      {
+        title: 'Criar e alternar para a branch dev',
+        text: 'Crie uma branch chamada dev para isolar o desenvolvimento de novas funcionalidades sem alterar diretamente a branch principal (main):',
+        tip: 'O comando git switch -c dev cria a nova branch e já alterna para ela em uma única etapa!',
+        code: 'git switch -c dev',
+        lang: 'bash'
+      },
+      {
+        title: 'Registrar e publicar a branch dev no GitHub',
+        text: 'Faça uma alteração em um arquivo, crie um commit e publique a branch dev no repositório remoto com o parâmetro -u origin dev:',
+        code: '# Prepara e registra o commit na branch dev\ngit add .\ngit commit -m "feat: desenvolve melhorias na branch dev"\n\n# Publica a branch dev no GitHub\ngit push -u origin dev',
+        lang: 'bash'
+      },
+      {
+        title: 'Abrir um Pull Request no GitHub',
+        text: 'No GitHub, acesse a aba "Pull requests" e clique em "New pull request". Configure a branch main como base e a branch dev para comparar:',
+        code: 'Base: main  ←  Compare: dev\nTítulo: Integração das alterações da branch dev\nDescrição: Detalha as melhorias implementadas na branch dev para revisão antes do merge.',
+        lang: 'text'
+      }
     ],
-    exercise: 'Em dupla, uma pessoa abre um PR e a outra revisa, deixa um comentário útil e aprova ou solicita ajustes. Faça o merge somente após a revisão e conforme as regras do repositório.',
-    check: ['Criei uma branch separada.', 'Publiquei a branch no GitHub.', 'Abri ou revisei um Pull Request.', 'Entendo que PR é uma proposta de integração, não um comando Git.']
+    exercise: 'Crie a branch dev com git switch -c dev, faça uma alteração, envie para o remoto com git push -u origin dev e abra um Pull Request no GitHub propondo a integração da dev na main.',
+    check: [
+      'Criei e acessei a branch dev com git switch -c dev.',
+      'Publiquei a branch dev no GitHub com git push -u origin dev.',
+      'Abri ou revisei um Pull Request comparando dev com main.',
+      'Entendo que Pull Request é uma proposta de integração no GitHub, e não um comando do Git.'
+    ]
   },
   {
     id: 5, title: 'Comandos intermediários e avançados', short: 'Histórico e recuperação', icon: GitFork, duration: '45 min',
