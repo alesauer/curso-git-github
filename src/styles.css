@@ -2426,38 +2426,130 @@ h1 span {
 
 /* Print CSS: Only print the certificate */
 @media print {
-  body {
-    background: #fff !important;
+  @page {
+    size: landscape;
+    margin: 0.8cm;
   }
-  .app-shell, .topbar, .sidebar, .main-content, .cert-modal-topbar, .cert-modal-actions, .app-modal-close-btn, .cert-email-status-banner {
+
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide app navigation, layout, header, footer, banners and topbar controls */
+  .topbar,
+  .layout,
+  .sidebar,
+  .main-content,
+  .footer,
+  .expand-floating,
+  .mobile-backdrop,
+  .cert-modal-topbar,
+  .cert-modal-actions,
+  .app-modal-close-btn,
+  .cert-email-status-banner {
     display: none !important;
   }
+
+  .app-shell {
+    display: block !important;
+    background: transparent !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
   .app-modal-backdrop {
     position: static !important;
+    inset: auto !important;
     background: transparent !important;
     padding: 0 !important;
+    margin: 0 !important;
     backdrop-filter: none !important;
+    display: block !important;
+    width: 100% !important;
   }
+
   .cert-modal-box {
     box-shadow: none !important;
     border: none !important;
     max-width: 100% !important;
     width: 100% !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    background: transparent !important;
   }
+
   .cert-scroll-area {
     padding: 0 !important;
     background: transparent !important;
     overflow: visible !important;
+    display: block !important;
+    width: 100% !important;
   }
+
   .certificate-frame {
     box-shadow: none !important;
     border: 3px double #b79a4a !important;
+    border-radius: 8px !important;
     width: 100% !important;
     max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 8px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    box-sizing: border-box !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
-  @page {
-    size: landscape;
-    margin: 1cm;
+
+  .certificate-inner {
+    background: #ffffff !important;
+    border: 1px solid #d4c285 !important;
+    padding: 24px 30px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .cert-student-name {
+    font-size: 28px !important;
+    color: #112d0e !important;
+    border-bottom: 2px solid #d4c285 !important;
+    padding: 4px 20px 8px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .cert-skill-pill {
+    background: #f2faee !important;
+    border: 1px solid #c9e5bc !important;
+    color: #1b5b0b !important;
+    font-size: 10.5px !important;
+    padding: 3px 8px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .cert-seal {
+    border: 2px dashed #b79a4a !important;
+    background: #fefdf9 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .cert-signature-line {
+    border-top: 1.5px solid #2d4525 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 
